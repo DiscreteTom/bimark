@@ -61,4 +61,21 @@ export class BiMark {
       }
     });
   }
+
+  /**
+   * Scan a markdown document for definitions.
+   */
+  scan(s: string) {
+    const result: { content: string; from: number; path: string }[] = [];
+    this.inventory.forEach((path, content) => {
+      [...s.matchAll(new RegExp(content, "g"))].forEach((m) => {
+        result.push({
+          content: m[0],
+          from: m.index!,
+          path,
+        });
+      });
+    });
+    return result;
+  }
 }
