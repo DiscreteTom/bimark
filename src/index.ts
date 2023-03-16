@@ -2,14 +2,14 @@ import { marked } from "marked";
 import { parse, HTMLElement } from "node-html-parser";
 
 export class BiMark {
-  readonly includeTags: readonly string[];
+  readonly collectFromTags: readonly string[];
   /** content => path */
   readonly inventory: Map<string, string>;
 
-  constructor(options?: { includeTags?: string[] }) {
+  constructor(options?: { collectFromTags?: string[] }) {
     this.inventory = new Map();
-    this.includeTags = (
-      options?.includeTags ?? ["p", "h1", "h2", "h3", "h4", "h5", "h6"]
+    this.collectFromTags = (
+      options?.collectFromTags ?? ["p", "h1", "h2", "h3", "h4", "h5", "h6"]
     ).map((t) => t.toUpperCase());
   }
 
@@ -45,7 +45,7 @@ export class BiMark {
   }
 
   private collectFromElement(path: string, e: HTMLElement) {
-    if (e.tagName && this.includeTags.includes(e.tagName.toUpperCase())) {
+    if (e.tagName && this.collectFromTags.includes(e.tagName.toUpperCase())) {
       [...e.rawText.matchAll(/\[\[(.*?)\]\]/g)].forEach((m) => {
         this.inventory.set(
           m[0].slice(2, -2), // remove `[[` and `]]`
