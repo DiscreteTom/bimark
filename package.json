@@ -2,6 +2,10 @@
   "name": "bimark",
   "version": "0.1.0",
   "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
   "repository": "git@github.com:DiscreteTom/bimark.git",
   "author": "DiscreteTom <discrete_tom@outlook.com>",
   "license": "MIT",
