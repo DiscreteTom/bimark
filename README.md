@@ -21,7 +21,7 @@ In the above example, `BiMark` and `bidirectional link` are definitions.
 Then, run `bimark <file>` to render the markdown documents:
 
 ```sh
-bimark intro.md
+bimark file.md
 ```
 
 Output:
@@ -29,7 +29,7 @@ Output:
 ```md
 # <span id="BiMark">BiMark</span>
 
-[BiMark](./intro.md#BiMark) is a tool to auto create <span id="bidirectional-link">bidirectional link</span> between markdown files.
+[BiMark](#BiMark) is a tool to auto create <span id="bidirectional-link">bidirectional link</span> between markdown files.
 
-Once the [bidirectional link](./intro.md#bidirectional-link) is created, you can use it to navigate between markdown files.
+Once the [bidirectional link](#bidirectional-link) is created, you can use it to navigate between markdown files.
 ```
