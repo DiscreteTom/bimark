@@ -69,3 +69,11 @@ You can escape a reference using `[[!name]]`:
 ```
 
 The escaped reference will not be replaced with a link, and will not be assigned an id.
+
+## FAQ
+
+- Where can I make a definition/reference?
+  - Texts in headings, paragraphs, and lists are supported.
+  - Code blocks, inline code, links, and images are not supported.
+- How to solve the problem of duplicate ids?
+  - You can use `[[name:id]]` to specify the id of a definition.
