@@ -68,7 +68,7 @@ export class BiMark {
 
   private processDefinition(
     fragments: Fragment[],
-    options: { showBorder: boolean; showAlias: boolean }
+    options: { showBrackets: boolean; showAlias: boolean }
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -111,12 +111,12 @@ export class BiMark {
         // append definition to result
         result.push({
           content: `<span id="${id}">${
-            (options.showBorder ? "[[" : "") +
+            (options.showBrackets ? "[[" : "") +
             name +
             (options.showAlias && alias.length > 0
               ? "|" + alias.join("|")
               : "") +
-            (options.showBorder ? "]]" : "")
+            (options.showBrackets ? "]]" : "")
           }</span>`,
           skip: true,
         });
@@ -138,7 +138,7 @@ export class BiMark {
   private processExplicitOrEscapedReference(
     path: string,
     fragments: Fragment[],
-    options: { showBorder: boolean }
+    options: { showBrackets: boolean }
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -195,9 +195,9 @@ export class BiMark {
               def,
               def.refs.length - 1
             )}">${
-              (options.showBorder ? "[[" : "") +
+              (options.showBrackets ? "[[" : "") +
               def.name +
-              (options.showBorder ? "]]" : "")
+              (options.showBrackets ? "]]" : "")
             }</span>](${def.path}#${def.id})`,
             skip: true,
           });
@@ -221,7 +221,7 @@ export class BiMark {
     path: string,
     fragments: Fragment[],
     def: Definition,
-    options: { showBorder: boolean }
+    options: { showBrackets: boolean }
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -261,9 +261,9 @@ export class BiMark {
             def,
             def.refs.length - 1
           )}">${
-            (options.showBorder ? "[[" : "") +
+            (options.showBrackets ? "[[" : "") +
             def.name +
-            (options.showBorder ? "]]" : "")
+            (options.showBrackets ? "]]" : "")
           }</span>](${def.path}#${def.id})`,
           skip: true,
         });
@@ -286,8 +286,8 @@ export class BiMark {
     path: string,
     s: string,
     options: {
-      def: { showAlias: boolean; showBorder: boolean };
-      ref: { showBorder: boolean };
+      def: { showAlias: boolean; showBrackets: boolean };
+      ref: { showBrackets: boolean };
     }
   ) {
     let fragments: { content: string; skip: boolean }[] = [
@@ -296,15 +296,15 @@ export class BiMark {
 
     fragments = this.processDefinition(fragments, {
       showAlias: options.def.showAlias,
-      showBorder: options.def.showBorder,
+      showBrackets: options.def.showBrackets,
     });
     fragments = this.processExplicitOrEscapedReference(path, fragments, {
-      showBorder: options.ref.showBorder,
+      showBrackets: options.ref.showBrackets,
     });
 
     this.name2def.forEach((def) => {
       fragments = this.processImplicitReference(path, fragments, def, {
-        showBorder: options.ref.showBorder,
+        showBrackets: options.ref.showBrackets,
       });
     });
 
@@ -318,8 +318,8 @@ export class BiMark {
     path: string,
     md: string,
     options?: {
-      def?: { showAlias?: boolean; showBorder?: boolean };
-      ref?: { showBorder?: boolean };
+      def?: { showAlias?: boolean; showBrackets?: boolean };
+      ref?: { showBrackets?: boolean };
     }
   ) {
     const ast = remark.parse(md);
@@ -333,9 +333,9 @@ export class BiMark {
               value: this.processText(path, c.value, {
                 def: {
                   showAlias: options?.def?.showAlias ?? false,
-                  showBorder: options?.def?.showBorder ?? false,
+                  showBrackets: options?.def?.showBrackets ?? false,
                 },
-                ref: { showBorder: options?.ref?.showBorder ?? false },
+                ref: { showBrackets: options?.ref?.showBrackets ?? false },
               }),
               ...rest,
             };
@@ -353,8 +353,8 @@ export class BiMark {
     md: string,
     options?: {
       path?: string;
-      def?: { showAlias?: boolean; showBorder?: boolean };
-      ref?: { showBorder?: boolean };
+      def?: { showAlias?: boolean; showBrackets?: boolean };
+      ref?: { showBrackets?: boolean };
     }
   ) {
     const path = options?.path ?? "";
