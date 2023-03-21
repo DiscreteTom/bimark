@@ -110,7 +110,7 @@ export class BiMark {
     return this;
   }
 
-  private process(
+  private processFragments(
     fragments: Fragment[],
     regex: RegExp,
     processor: (m: RegExpMatchArray) => Fragment
@@ -162,11 +162,11 @@ export class BiMark {
     return result;
   }
 
-  private processDefinition(
+  private renderDefinition(
     fragments: Fragment[],
     options: { showBrackets: boolean; showAlias: boolean }
   ) {
-    return this.process(
+    return this.processFragments(
       fragments,
       // [[name|alias1|alias2:ID]]
       /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g,
@@ -189,12 +189,12 @@ export class BiMark {
     );
   }
 
-  private processExplicitOrEscapedReference(
+  private renderExplicitOrEscapedReference(
     path: string,
     fragments: Fragment[],
     options: { showBrackets: boolean; html: boolean }
   ) {
-    return this.process(
+    return this.processFragments(
       fragments,
       // [[#id]] or [[!name]]
       /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
@@ -236,7 +236,7 @@ export class BiMark {
     );
   }
 
-  private processImplicitReference(
+  private renderImplicitReference(
     path: string,
     fragments: Fragment[],
     def: Definition,
@@ -244,7 +244,7 @@ export class BiMark {
     content: string,
     options: { showBrackets: boolean; html: boolean }
   ) {
-    return this.process(fragments, new RegExp(content, "g"), (m) => {
+    return this.processFragments(fragments, new RegExp(content, "g"), (m) => {
       def.refs.push(path);
       const span = `<span id="${this.refIdGenerator(
         path,
@@ -264,7 +264,7 @@ export class BiMark {
     });
   }
 
-  private processText(
+  private renderText(
     path: string,
     s: string,
     options: {
@@ -276,17 +276,17 @@ export class BiMark {
       { content: s, skip: false },
     ];
 
-    fragments = this.processDefinition(fragments, {
+    fragments = this.renderDefinition(fragments, {
       showAlias: options.def.showAlias,
       showBrackets: options.def.showBrackets,
     });
-    fragments = this.processExplicitOrEscapedReference(path, fragments, {
+    fragments = this.renderExplicitOrEscapedReference(path, fragments, {
       showBrackets: options.ref.showBrackets,
       html: options.ref.html,
     });
 
     this.name2def.forEach((def, content) => {
-      fragments = this.processImplicitReference(path, fragments, def, content, {
+      fragments = this.renderImplicitReference(path, fragments, def, content, {
         showBrackets: options.ref.showBrackets,
         html: options.ref.html,
       });
@@ -314,7 +314,7 @@ export class BiMark {
             const { type, value, ...rest } = c;
             return {
               type: "html", // use html node to avoid escaping
-              value: this.processText(path, c.value, {
+              value: this.renderText(path, c.value, {
                 def: {
                   showAlias: options?.def?.showAlias ?? false,
                   showBrackets: options?.def?.showBrackets ?? false,
