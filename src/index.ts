@@ -309,4 +309,8 @@ export class BiMark {
     });
     return remark.stringify(ast);
   }
+
+  static singleFile(md: string, path = "") {
+    return new BiMark().collect(path, md).render(md);
+  }
 }
