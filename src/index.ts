@@ -62,7 +62,7 @@ export class BiMark {
             throw new Error(`Duplicate definition id: ${id}`);
           alias.forEach((a) => {
             if (this.name2def.has(a))
-              throw new Error(`Duplicate definition alias: ${a}`);
+              throw new Error(`Duplicate definition name: ${a}`);
           });
 
           this.name2def.set(name, def);
