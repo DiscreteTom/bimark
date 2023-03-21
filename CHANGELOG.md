@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.2
+
+- Optimize code.
+
 ## v0.1.1
 
 - Add `ref.html` option in `render` function.

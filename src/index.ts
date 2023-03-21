@@ -80,9 +80,10 @@ export class BiMark {
     return this;
   }
 
-  private processDefinition(
+  private process(
     fragments: Fragment[],
-    options: { showBrackets: boolean; showAlias: boolean }
+    regex: RegExp,
+    processor: (m: RegExpMatchArray) => Fragment
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -91,16 +92,8 @@ export class BiMark {
         return;
       }
 
-      const matches = [
-        ...f.content.matchAll(
-          // [[name|alias1|alias2:ID]]
-          /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g
-        ),
-      ];
+      const matches = [...f.content.matchAll(regex)];
       matches.forEach((m, i, all) => {
-        const name = m[1];
-        const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
         const start = m.index!;
         const end = m.index! + m[0].length;
         const before = f.content.slice(
@@ -122,18 +115,8 @@ export class BiMark {
             content: before,
             skip: false,
           });
-        // append definition to result
-        result.push({
-          content: `<span id="${id}">${
-            (options.showBrackets ? "[[" : "") +
-            name +
-            (options.showAlias && alias.length > 0
-              ? "|" + alias.join("|")
-              : "") +
-            (options.showBrackets ? "]]" : "")
-          }</span>`,
-          skip: true,
-        });
+        // append process result
+        result.push(processor(m));
         // append after to result if this is the last match
         if (i == all.length - 1 && after.length > 0)
           result.push({
@@ -149,61 +132,57 @@ export class BiMark {
     return result;
   }
 
+  private processDefinition(
+    fragments: Fragment[],
+    options: { showBrackets: boolean; showAlias: boolean }
+  ) {
+    return this.process(
+      fragments,
+      // [[name|alias1|alias2:ID]]
+      /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g,
+      (m) => {
+        const name = m[1];
+        const alias = m[2].split("|").slice(1);
+        const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
+        return {
+          content: `<span id="${id}">${
+            (options.showBrackets ? "[[" : "") +
+            name +
+            (options.showAlias && alias.length > 0
+              ? "|" + alias.join("|")
+              : "") +
+            (options.showBrackets ? "]]" : "")
+          }</span>`,
+          skip: true,
+        };
+      }
+    );
+  }
+
   private processExplicitOrEscapedReference(
     path: string,
     fragments: Fragment[],
     options: { showBrackets: boolean; html: boolean }
   ) {
-    const result: Fragment[] = [];
-    fragments.forEach((f) => {
-      if (f.skip) {
-        result.push(f);
-        return;
-      }
-
-      const matches = [
-        ...f.content.matchAll(
-          // [[#id]] or [[!name]]
-          /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g
-        ),
-      ];
-      matches.forEach((m, i, all) => {
+    return this.process(
+      fragments,
+      // [[#id]] or [[!name]]
+      /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
+      (m) => {
         const def = m[1].startsWith("#")
           ? this.id2def.get(m[1].slice(1))
           : this.name2def.get(m[1].slice(1));
-
         // check existence
         if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
 
         const escaped = m[1].startsWith("!");
-        const start = m.index!;
-        const end = m.index! + m[0].length;
-        const before = f.content.slice(
-          i == 0
-            ? 0 // current match is the first one
-            : all[i - 1].index! + all[i - 1][0].length, // current match is not the first one
-          start
-        );
-        const after = f.content.slice(
-          end,
-          i == all.length - 1
-            ? undefined // current match is the last one
-            : all[i + 1].index! + all[i + 1][0].length // current match is not the last one
-        );
 
-        // append before to result
-        if (before.length > 0)
-          result.push({
-            content: before,
-            skip: false,
-          });
-        // append reference to result
         if (escaped)
-          result.push({
+          return {
             // for an escaped reference, just show the name
             content: def.name,
             skip: true,
-          });
+          };
         else {
           def.refs.push(path);
           const span = `<span id="${this.refIdGenerator(
@@ -215,27 +194,16 @@ export class BiMark {
             def.name +
             (options.showBrackets ? "]]" : "")
           }</span>`;
-          result.push({
+          return {
             // for a explicit reference, show the name with a link
             content: options.html
               ? `<a href="${def.path}#${def.id}">${span}</a>`
               : `[${span}](${def.path}#${def.id})`,
             skip: true,
-          });
+          };
         }
-        // append after to result if this is the last match
-        if (i == all.length - 1 && after.length > 0)
-          result.push({
-            content: after,
-            skip: false,
-          });
-      });
-
-      if (matches.length == 0) {
-        result.push(f);
       }
-    });
-    return result;
+    );
   }
 
   private processImplicitReference(
@@ -246,67 +214,24 @@ export class BiMark {
     content: string,
     options: { showBrackets: boolean; html: boolean }
   ) {
-    const result: Fragment[] = [];
-    fragments.forEach((f) => {
-      if (f.skip) {
-        result.push(f);
-        return;
-      }
-
-      const matches = [...f.content.matchAll(new RegExp(content, "g"))];
-      matches.forEach((m, i, all) => {
-        const matched = m[0];
-        const start = m.index!;
-        const end = m.index! + m[0].length;
-        const before = f.content.slice(
-          i == 0
-            ? 0 // current match is the first one
-            : all[i - 1].index! + all[i - 1][0].length, // current match is not the first one
-          start
-        );
-        const after = f.content.slice(
-          end,
-          i == all.length - 1
-            ? undefined // current match is the last one
-            : all[i + 1].index! + all[i + 1][0].length // current match is not the last one
-        );
-
-        // append before to result
-        if (before.length > 0)
-          result.push({
-            content: before,
-            skip: false,
-          });
-        // append reference to result
-        def.refs.push(path);
-        const span = `<span id="${this.refIdGenerator(
-          path,
-          def,
-          def.refs.length - 1
-        )}">${
-          (options.showBrackets ? "[[" : "") +
-          content + // don't use def.name here, because it may be an alias
-          (options.showBrackets ? "]]" : "")
-        }</span>`;
-        result.push({
-          content: options.html
-            ? `<a href="${def.path}#${def.id}">${span}</a>`
-            : `[${span}](${def.path}#${def.id})`,
-          skip: true,
-        });
-        // append after to result if this is the last match
-        if (i == all.length - 1 && after.length > 0)
-          result.push({
-            content: after,
-            skip: false,
-          });
-      });
-
-      if (matches.length == 0) {
-        result.push(f);
-      }
+    return this.process(fragments, new RegExp(content, "g"), (m) => {
+      def.refs.push(path);
+      const span = `<span id="${this.refIdGenerator(
+        path,
+        def,
+        def.refs.length - 1
+      )}">${
+        (options.showBrackets ? "[[" : "") +
+        content + // don't use def.name here, because it may be an alias
+        (options.showBrackets ? "]]" : "")
+      }</span>`;
+      return {
+        content: options.html
+          ? `<a href="${def.path}#${def.id}">${span}</a>`
+          : `[${span}](${def.path}#${def.id})`,
+        skip: true,
+      };
     });
-    return result;
   }
 
   private processText(
