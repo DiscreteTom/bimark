@@ -74,12 +74,13 @@ export class BiMark {
         return;
       }
 
-      [
+      const matches = [
         ...f.content.matchAll(
           // [[name|alias1|alias2:ID]]
           /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g
         ),
-      ].forEach((m, i, all) => {
+      ];
+      matches.forEach((m, i, all) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
         const id = m[4] ? m[4].slice(1) : name;
@@ -123,6 +124,10 @@ export class BiMark {
             skip: false,
           });
       });
+
+      if (matches.length == 0) {
+        result.push(f);
+      }
     });
     return result;
   }
@@ -138,12 +143,13 @@ export class BiMark {
         return;
       }
 
-      [
+      const matches = [
         ...f.content.matchAll(
           // [[#id]] or [[!name]]
           /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g
         ),
-      ].forEach((m, i, all) => {
+      ];
+      matches.forEach((m, i, all) => {
         const def = m[1].startsWith("#")
           ? this.id2def.get(m[1].slice(1))!
           : this.name2def.get(m[1].slice(1))!; // TODO: check existence
@@ -195,6 +201,10 @@ export class BiMark {
             skip: false,
           });
       });
+
+      if (matches.length == 0) {
+        result.push(f);
+      }
     });
     return result;
   }
@@ -211,47 +221,50 @@ export class BiMark {
         return;
       }
 
-      [...f.content.matchAll(new RegExp(def.name, "g"))].forEach(
-        (m, i, all) => {
-          const start = m.index!;
-          const end = m.index! + m[0].length;
-          const before = f.content.slice(
-            i == 0
-              ? 0 // current match is the first one
-              : all[i - 1].index! + all[i - 1][0].length, // current match is not the first one
-            start
-          );
-          const after = f.content.slice(
-            end,
-            i == all.length - 1
-              ? undefined // current match is the last one
-              : all[i + 1].index! + all[i + 1][0].length // current match is not the last one
-          );
+      const matches = [...f.content.matchAll(new RegExp(def.name, "g"))];
+      matches.forEach((m, i, all) => {
+        const start = m.index!;
+        const end = m.index! + m[0].length;
+        const before = f.content.slice(
+          i == 0
+            ? 0 // current match is the first one
+            : all[i - 1].index! + all[i - 1][0].length, // current match is not the first one
+          start
+        );
+        const after = f.content.slice(
+          end,
+          i == all.length - 1
+            ? undefined // current match is the last one
+            : all[i + 1].index! + all[i + 1][0].length // current match is not the last one
+        );
 
-          // append before to result
-          if (before.length > 0)
-            result.push({
-              content: before,
-              skip: false,
-            });
-          // append reference to result
-          def.refcount++;
+        // append before to result
+        if (before.length > 0)
           result.push({
-            content: `[<span id="${def.id}-ref-${def.refcount}">${
-              (options.showBorder ? "[[" : "") +
-              def.name +
-              (options.showBorder ? "]]" : "")
-            }</span>](${def.path}#${def.id})`,
-            skip: true,
+            content: before,
+            skip: false,
           });
-          // append after to result if this is the last match
-          if (i == all.length - 1 && after.length > 0)
-            result.push({
-              content: after,
-              skip: false,
-            });
-        }
-      );
+        // append reference to result
+        def.refcount++;
+        result.push({
+          content: `[<span id="${def.id}-ref-${def.refcount}">${
+            (options.showBorder ? "[[" : "") +
+            def.name +
+            (options.showBorder ? "]]" : "")
+          }</span>](${def.path}#${def.id})`,
+          skip: true,
+        });
+        // append after to result if this is the last match
+        if (i == all.length - 1 && after.length > 0)
+          result.push({
+            content: after,
+            skip: false,
+          });
+      });
+
+      if (matches.length == 0) {
+        result.push(f);
+      }
     });
     return result;
   }
