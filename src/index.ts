@@ -282,22 +282,29 @@ export class BiMark {
     return result;
   }
 
-  private processText(path: string, s: string) {
+  private processText(
+    path: string,
+    s: string,
+    options: {
+      def: { showAlias: boolean; showBorder: boolean };
+      ref: { showBorder: boolean };
+    }
+  ) {
     let fragments: { content: string; skip: boolean }[] = [
       { content: s, skip: false },
     ];
 
     fragments = this.processDefinition(fragments, {
-      showAlias: true,
-      showBorder: true,
+      showAlias: options.def.showAlias,
+      showBorder: options.def.showBorder,
     });
     fragments = this.processExplicitOrEscapedReference(path, fragments, {
-      showBorder: true,
+      showBorder: options.ref.showBorder,
     });
 
     this.name2def.forEach((def) => {
       fragments = this.processImplicitReference(path, fragments, def, {
-        showBorder: false,
+        showBorder: options.ref.showBorder,
       });
     });
 
@@ -307,7 +314,14 @@ export class BiMark {
   /**
    * Render a markdown file based on the collected definitions.
    */
-  render(path: string, md: string) {
+  render(
+    path: string,
+    md: string,
+    options?: {
+      def?: { showAlias?: boolean; showBorder?: boolean };
+      ref?: { showBorder?: boolean };
+    }
+  ) {
     const ast = remark.parse(md);
     visit(ast, (node) => {
       if ("children" in node) {
@@ -316,7 +330,13 @@ export class BiMark {
             const { type, value, ...rest } = c;
             return {
               type: "html", // use html node to avoid escaping
-              value: this.processText(path, c.value),
+              value: this.processText(path, c.value, {
+                def: {
+                  showAlias: options?.def?.showAlias ?? false,
+                  showBorder: options?.def?.showBorder ?? false,
+                },
+                ref: { showBorder: options?.ref?.showBorder ?? false },
+              }),
               ...rest,
             };
           } else return c;
@@ -329,8 +349,16 @@ export class BiMark {
   /**
    * Collect definitions from a markdown file then render it.
    */
-  static singleFile(md: string, path = "") {
-    return new BiMark().collect(path, md).render(path, md);
+  static singleFile(
+    md: string,
+    options?: {
+      path?: string;
+      def?: { showAlias?: boolean; showBorder?: boolean };
+      ref?: { showBorder?: boolean };
+    }
+  ) {
+    const path = options?.path ?? "";
+    return new BiMark().collect(path, md).render(path, md, options);
   }
 
   /**
