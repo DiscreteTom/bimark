@@ -31,7 +31,7 @@ export class BiMark {
     this.defIdGenerator = options?.defIdGenerator ?? ((name) => uslug(name));
     this.refIdGenerator =
       options?.refIdGenerator ??
-      ((path, def, index) => `${path}#${def.id}-ref-${index + 1}`);
+      ((_, def, index) => `${def.id}-ref-${index + 1}`);
 
     this.name2def = new Map();
     this.id2def = new Map();
@@ -374,6 +374,6 @@ export class BiMark {
     if (!def)
       throw new Error(`Definition not found: ${JSON.stringify(options)}`);
 
-    return def.refs.map((p, i) => this.refIdGenerator(p, def, i));
+    return def.refs.map((p, i) => `${p}#${this.refIdGenerator(p, def, i)}`);
   }
 }
