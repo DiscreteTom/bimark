@@ -1,6 +1,6 @@
 # BiMark
 
-Auto create bidirectional link between markdown files.
+Auto create bidirectional links between markdown files.
 
 ## Usage
 
@@ -69,6 +69,25 @@ You can escape a reference using `[[!name]]`:
 ```
 
 The escaped reference will not be replaced with a link, and will not be assigned an id.
+
+### API
+
+```ts
+import { BiMark } from "bimark";
+
+// collect from and render a single file, return the rendered content
+BiMark.singleFile("# [[BiMark]]");
+
+// collect definitions
+const bm = new BiMark().collect("file1.md", content1);
+
+// render files
+bm.render("file1.md", content1);
+bm.render("file2.md", content2);
+
+// list reverse links
+bm.getReverseRefs({ name: "BiMark" }); // => ['file1.md#bimark-ref-1', 'file2.md#bimark-ref-2']
+```
 
 ## FAQ
 
