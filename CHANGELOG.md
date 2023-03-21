@@ -2,6 +2,7 @@
 
 ## v0.1.2
 
+- Add `Definition.position`.
 - Optimize code.
 
 ## v0.1.1

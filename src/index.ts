@@ -2,6 +2,13 @@ import { remark } from "remark";
 import { visit } from "unist-util-visit";
 import uslug from "uslug";
 
+export type Position = {
+  /** from 1 */
+  line: number;
+  /** from 1 */
+  column: number;
+};
+
 export type Definition = {
   name: string;
   alias: string[];
@@ -9,6 +16,12 @@ export type Definition = {
   id: string;
   /** Path list. */
   refs: string[];
+  /** Position in the original file. */
+  position: {
+    start: Position;
+    /** End is included. */
+    end: Position;
+  };
 };
 
 type Fragment = { content: string; skip: boolean };
@@ -53,7 +66,24 @@ export class BiMark {
           const name = m[1];
           const alias = m[2].split("|").slice(1);
           const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
-          const def = { path, name, id, alias, refs: [] };
+          const def: Definition = {
+            path,
+            name,
+            id,
+            alias,
+            refs: [],
+            position: {
+              start: {
+                line: node.position!.start.line,
+                column: node.position!.start.column + m.index!,
+              },
+              end: {
+                line: node.position!.start.line,
+                column:
+                  node.position!.start.column + m.index! + m[0].length - 1,
+              },
+            },
+          };
 
           // check name/alias/id duplication
           if (this.name2def.has(name))

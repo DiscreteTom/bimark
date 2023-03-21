@@ -8,6 +8,10 @@ test("simple collect", () => {
   expect(bm.name2def.get("BiMark")!.alias.length).toBe(0);
   expect(bm.name2def.get("BiMark")!.path).toBe("");
   expect(bm.name2def.get("BiMark")!.refs.length).toBe(0);
+  expect(bm.name2def.get("BiMark")!.position.start.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.position.start.column).toBe(3);
+  expect(bm.name2def.get("BiMark")!.position.end.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.position.end.column).toBe(12);
   expect(bm.name2def.get("BiMark")!).toBe(bm.id2def.get("bimark")!);
 });
 
@@ -24,6 +28,10 @@ test("complex collect", () => {
   );
   expect(bm.name2def.get("BiMark")!.path).toBe("file.md");
   expect(bm.name2def.get("BiMark")!.refs.length).toBe(0);
+  expect(bm.name2def.get("BiMark")!.position.start.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.position.start.column).toBe(3);
+  expect(bm.name2def.get("BiMark")!.position.end.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.position.end.column).toBe(30);
 
   expect(bm.name2def.get("BiMark")!).toBe(bm.id2def.get("bm")!);
   expect(bm.name2def.get("BiMark")!).toBe(bm.name2def.get("bimark")!);
