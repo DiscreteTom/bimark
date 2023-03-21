@@ -24,18 +24,6 @@ export class BiMark {
   }
 
   /**
-   * Load a list of definition.
-   * This is useful when you want to load a pre-existing inventory.
-   */
-  // load(defs: Definition[] | Map<string, Definition>) {
-  //   defs.forEach((d) => {
-  //     this.name2def.set(d.name, d);
-  //     this.id2def.set(d.id, d);
-  //   });
-  //   return this;
-  // }
-
-  /**
    * Collect definitions from a markdown document.
    */
   collect(path: string, md: string) {
