@@ -6,7 +6,7 @@ export type Definition = {
   alias: string[];
   path: string;
   id: string;
-  refcount: number;
+  refcount: number; // TODO: add reverse reference
 };
 
 type Fragment = { content: string; skip: boolean };
@@ -291,6 +291,9 @@ export class BiMark {
     return fragments.map((f) => f.content).join("");
   }
 
+  /**
+   * Render a markdown file based on the collected definitions.
+   */
   render(md: string) {
     const ast = remark.parse(md);
     visit(ast, (node) => {
@@ -310,6 +313,9 @@ export class BiMark {
     return remark.stringify(ast);
   }
 
+  /**
+   * Collect definitions from a markdown file then render it.
+   */
   static singleFile(md: string, path = "") {
     return new BiMark().collect(path, md).render(md);
   }
