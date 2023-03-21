@@ -1,0 +1,15 @@
+.github
+example
+node_modules
+.gitignore
+.npmignore
+CHANGELOG.md
+coverage
+docs
+tests
+.vscode
+.prettierrc
+jest.config.js
+typedoc.json
+img
+README.md

@@ -1,5 +1,8 @@
 # BiMark
 
+[![npm](https://img.shields.io/npm/v/@discretetom/bimark?color=green&style=flat-square)](https://www.npmjs.com/package/@discretetom/bimark)
+![license](https://img.shields.io/github/license/DiscreteTom/bimark?style=flat-square)
+
 Auto create bidirectional links between markdown files.
 
 ## Usage
