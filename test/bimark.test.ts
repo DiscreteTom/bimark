@@ -110,3 +110,18 @@ Once the [<span id="bidirectional-link-ref-1">bidirectional link</span>](#bidire
 `.trim()
   );
 });
+
+test("errors", () => {
+  expect(() => BiMark.singleFile("[[BiMark]] [[BiMark]]")).toThrow(
+    "Duplicate definition name"
+  );
+  expect(() => BiMark.singleFile("[[BiMark]] [[bm|BiMark]]")).toThrow(
+    "Duplicate definition name"
+  );
+  expect(() => BiMark.singleFile("[[BiMark:bm]] [[BiMark2:bm]]")).toThrow(
+    "Duplicate definition id"
+  );
+  expect(() => BiMark.singleFile("[[#bimark]]")).toThrow(
+    "Definition not found"
+  );
+});
