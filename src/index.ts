@@ -14,7 +14,7 @@ export type Definition = {
 type Fragment = { content: string; skip: boolean };
 
 export class BiMark {
-  /** name => Definition */
+  /** name/alias => Definition */
   readonly name2def: Map<string, Definition>;
   /** id => Definition */
   readonly id2def: Map<string, Definition>;
@@ -54,7 +54,17 @@ export class BiMark {
           const alias = m[2].split("|").slice(1);
           const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
           const def = { path, name, id, alias, refs: [] };
-          // TODO: check name/alias/id duplication
+
+          // check name/alias/id duplication
+          if (this.name2def.has(name))
+            throw new Error(`Duplicate definition name: ${name}`);
+          if (this.id2def.has(id))
+            throw new Error(`Duplicate definition id: ${id}`);
+          alias.forEach((a) => {
+            if (this.name2def.has(a))
+              throw new Error(`Duplicate definition alias: ${a}`);
+          });
+
           this.name2def.set(name, def);
           this.id2def.set(id, def);
           alias.forEach((a) => {
