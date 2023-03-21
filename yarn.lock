@@ -707,6 +707,11 @@
   resolved "https://registry.npmmirror.com/@types/unist/-/unist-2.0.6.tgz#250a7b16c3b91f672a24552ec64678eeb1d3a08d"
   integrity sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==
 
+"@types/uslug@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmmirror.com/@types/uslug/-/uslug-1.0.1.tgz#78b67d4e0010b4b16a30eec215de494e7b804680"
+  integrity sha512-o1q19vUrPPO50ZwJTO/1Wu/EcMWKFE8lpdL7GfZYXADiR3lOpGDQCpZMgHfMA8flFu5JNUe2OWXXv4YflId1ew==
+
 "@types/yargs-parser@*":
   version "21.0.0"
   resolved "https://registry.npmmirror.com/@types/yargs-parser/-/yargs-parser-21.0.0.tgz#0c60e537fa790f5f9472ed2776c2b71ec117351b"
@@ -2576,6 +2581,11 @@ unist-util-visit@^4.0.0, unist-util-visit@^4.1.2:
     unist-util-is "^5.0.0"
     unist-util-visit-parents "^5.1.1"
 
+"unorm@>= 1.0.0":
+  version "1.6.0"
+  resolved "https://registry.npmmirror.com/unorm/-/unorm-1.6.0.tgz#029b289661fba714f1a9af439eb51d9b16c205af"
+  integrity sha512-b2/KCUlYZUeA7JFUuRJZPUtr4gZvBh7tavtv4fvk4+KV9pfGiR6CQAQAWl49ZpR3ts2dk4FYkP7EIgDJoiOLDA==
+
 update-browserslist-db@^1.0.10:
   version "1.0.10"
   resolved "https://registry.npmmirror.com/update-browserslist-db/-/update-browserslist-db-1.0.10.tgz#0f54b876545726f17d00cd9a2561e6dade943ff3"
@@ -2583,6 +2593,13 @@ update-browserslist-db@^1.0.10:
   dependencies:
     escalade "^3.1.1"
     picocolors "^1.0.0"
+
+uslug@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmmirror.com/uslug/-/uslug-1.0.4.tgz#b9a22f0914e0a86140633dacc302e5f4fa450677"
+  integrity sha512-Jrbpp/NS3TvIGNjfJT1sn3/BCeykoxR8GbNYW5lF6fUscLkbXFwj1b7m4DvIkHm8k3Qr6Co68lbTmoZTMGk/ow==
+  dependencies:
+    unorm ">= 1.0.0"
 
 uvu@^0.5.0:
   version "0.5.6"
