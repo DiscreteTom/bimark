@@ -5,6 +5,7 @@
 The initial release.
 
 - `BiMark`
-  - `load` to load definitions.
   - `collect` to collect definitions from markdown documents.
-  - `scan` to scan a markdown document for definitions.
+  - `render` to render a markdown document.
+  - `singleFile` to collect and render a single file.
+  - `getReverseRefs` to get reverse references of a definition.
