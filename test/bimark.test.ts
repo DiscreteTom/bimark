@@ -1,32 +1,34 @@
 import { BiMark } from "../src";
 
-test("load", () => {
-  const bi = new BiMark().load({
-    foo: "foo.md",
-    bar: "bar.md",
-  });
-  expect(bi.inventory.size).toBe(2);
-  expect(bi.inventory.get("foo")).toBe("foo.md");
-  expect(bi.inventory.get("bar")).toBe("bar.md");
-});
-
 test("collect", () => {
-  const bi = new BiMark().collect("foo.md", "foo [[bar]] baz");
-  expect(bi.inventory.size).toBe(1);
-  expect(bi.inventory.get("bar")).toBe("foo.md");
+  const bm = new BiMark().collect("", `# [[BiMark]]`);
+  expect(bm.name2def.size).toBe(1);
+  expect(bm.name2def.get("BiMark")!.name).toBe("BiMark");
+  expect(bm.name2def.get("BiMark")!.id).toBe("bimark");
+  expect(bm.name2def.get("BiMark")!.alias.length).toBe(0);
+  expect(bm.name2def.get("BiMark")!.path).toBe("");
+  expect(bm.name2def.get("BiMark")!.refs.length).toBe(0);
+  expect(bm.name2def.get("BiMark")!).toBe(bm.id2def.get("bimark")!);
 });
 
-test("scan", () => {
-  const bi = new BiMark().load({
-    foo: "foo.md",
-    bar: "bar.md",
-  });
-  const result = bi.scan("foo bar baz");
-  expect(result.length).toBe(2);
-  expect(result[0].content).toBe("foo");
-  expect(result[0].from).toBe(0);
-  expect(result[0].path).toBe("foo.md");
-  expect(result[1].content).toBe("bar");
-  expect(result[1].from).toBe(4);
-  expect(result[1].path).toBe("bar.md");
+test("single file", () => {
+  expect(
+    BiMark.singleFile(
+      `
+# [[BiMark]]
+
+BiMark is a tool to auto create [[bidirectional link]] between markdown files.
+
+Once the bidirectional link is created, you can use it to navigate between markdown files.
+  `
+    ).trim()
+  ).toBe(
+    `
+# <span id="bimark">BiMark</span>
+
+[<span id="bimark-ref-1">BiMark</span>](#bimark) is a tool to auto create <span id="bidirectional-link">bidirectional link</span> between markdown files.
+
+Once the [<span id="bidirectional-link-ref-1">bidirectional link</span>](#bidirectional-link) is created, you can use it to navigate between markdown files.
+`.trim()
+  );
 });
