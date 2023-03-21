@@ -1,5 +1,6 @@
 import { remark } from "remark";
 import { visit } from "unist-util-visit";
+import uslug from "uslug";
 
 export type Definition = {
   name: string;
@@ -17,8 +18,21 @@ export class BiMark {
   readonly name2def: Map<string, Definition>;
   /** id => Definition */
   readonly id2def: Map<string, Definition>;
+  readonly defIdGenerator: (name: string) => string;
+  readonly refIdGenerator: (
+    path: string,
+    def: Definition,
+    index: number
+  ) => string;
 
-  constructor() {
+  constructor(
+    options?: Partial<Pick<BiMark, "refIdGenerator" | "defIdGenerator">>
+  ) {
+    this.defIdGenerator = options?.defIdGenerator ?? ((name) => uslug(name));
+    this.refIdGenerator =
+      options?.refIdGenerator ??
+      ((path, def, index) => `${path}#${def.id}-ref-${index + 1}`);
+
     this.name2def = new Map();
     this.id2def = new Map();
   }
@@ -38,7 +52,7 @@ export class BiMark {
         ].forEach((m) => {
           const name = m[1];
           const alias = m[2].split("|").slice(1);
-          const id = m[4] ? m[4].slice(1) : name;
+          const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
           const def = { path, name, id, alias, refs: [] };
           // TODO: check name/alias/id duplication
           this.name2def.set(name, def);
@@ -72,7 +86,7 @@ export class BiMark {
       matches.forEach((m, i, all) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : name;
+        const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
         const start = m.index!;
         const end = m.index! + m[0].length;
         const before = f.content.slice(
@@ -176,7 +190,11 @@ export class BiMark {
           def.refs.push(path);
           result.push({
             // for a explicit reference, show the name with a link
-            content: `[<span id="${def.id}-ref-${def.refs.length}">${
+            content: `[<span id="${this.refIdGenerator(
+              path,
+              def,
+              def.refs.length - 1
+            )}">${
               (options.showBorder ? "[[" : "") +
               def.name +
               (options.showBorder ? "]]" : "")
@@ -238,7 +256,11 @@ export class BiMark {
         // append reference to result
         def.refs.push(path);
         result.push({
-          content: `[<span id="${def.id}-ref-${def.refs.length}">${
+          content: `[<span id="${this.refIdGenerator(
+            path,
+            def,
+            def.refs.length - 1
+          )}">${
             (options.showBorder ? "[[" : "") +
             def.name +
             (options.showBorder ? "]]" : "")
@@ -324,6 +346,6 @@ export class BiMark {
     if (!def)
       throw new Error(`Definition not found: ${JSON.stringify(options)}`);
 
-    return def.refs.map((p, i) => `${p}#${def.id}-ref-${i + 1}`);
+    return def.refs.map((p, i) => this.refIdGenerator(p, def, i));
   }
 }
