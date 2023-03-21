@@ -310,4 +310,20 @@ export class BiMark {
   static singleFile(md: string, path = "") {
     return new BiMark().collect(path, md).render(path, md);
   }
+
+  /**
+   * Get the references of a definition.
+   * Return an array of link address to the references.
+   */
+  getReverseRefs(options: { id: string } | { name: string }) {
+    const def =
+      "id" in options
+        ? this.id2def.get(options.id)
+        : this.name2def.get(options.name);
+
+    if (!def)
+      throw new Error(`Definition not found: ${JSON.stringify(options)}`);
+
+    return def.refs.map((p, i) => `${p}#${def.id}-ref-${i + 1}`);
+  }
 }
