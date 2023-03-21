@@ -73,7 +73,12 @@ The escaped reference will not be replaced with a link, and will not be assigned
 ## FAQ
 
 - Where can I make a definition/reference?
-  - Texts in headings, paragraphs, and lists are supported.
-  - Code blocks, inline code, links, and images are not supported.
+  - Texts(e.g. headings, paragraphs, lists).
 - How to solve the problem of duplicate ids?
   - You can use `[[name:id]]` to specify the id of a definition.
+- What characters are allowed in the name of a definition?
+  - Regex: `[ a-zA-Z0-9_-]`.
+  - Yes, spaces are allowed.
+- What characters are allowed in the id of a definition?
+  - Regex: `[a-zA-Z0-9_-]`.
+  - No, spaces are not allowed.
