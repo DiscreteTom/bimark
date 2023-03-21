@@ -1,9 +1,15 @@
-# BiMark
+# [[BiMark]]
 
-[![npm](https://img.shields.io/npm/v/@discretetom/bimark?color=green&style=flat-square)](https://www.npmjs.com/package/@discretetom/bimark)
+[![npm](https://img.shields.io/npm/v/bimark?style=flat-square)](https://www.npmjs.com/package/bimark)
 ![license](https://img.shields.io/github/license/DiscreteTom/bimark?style=flat-square)
 
-Auto create bidirectional links between markdown files.
+Auto create [[bidirectional links]] between markdown files.
+
+## Installation
+
+```bash
+npm install bimark
+```
 
 ## Usage
 
@@ -14,9 +20,9 @@ Create definitions in markdown documents with `[[name]]`:
 ```md
 # [[BiMark]]
 
-BiMark is a tool to auto create [[bidirectional link]] between markdown files.
+BiMark is a tool to auto create [[bidirectional links]] between markdown files.
 
-Once the bidirectional link is created, you can use it to navigate between markdown files.
+Once bidirectional links are created, you can use it to navigate between markdown files.
 ```
 
 In the above example, `BiMark` and `bidirectional link` are definitions.
@@ -32,9 +38,9 @@ All definitions and references will be modified to add an id, and all references
 ```md
 # <span id="bimark">BiMark</span>
 
-[<span id="bimark-ref-1">BiMark</span>](#bimark) is a tool to auto create <span id="bidirectional-link">bidirectional link</span> between markdown files.
+[<span id="bimark-ref-1">BiMark</span>](#bimark) is a tool to auto create <span id="bidirectional-links">bidirectional links</span> between markdown files.
 
-Once the [<span id="bidirectional-link-ref-1">bidirectional link</span>](#bidirectional-link) is created, you can use it to navigate between markdown files.
+Once the [<span id="bidirectional-links-ref-1">bidirectional links</span>](#bidirectional-links) is created, you can use it to navigate between markdown files.
 ```
 
 ### Explicit Reference
@@ -44,9 +50,9 @@ You can create references explicitly using `[[#id]]`:
 ```md
 # [[BiMark]]
 
-[[#bimark]] is a tool to auto create [[bidirectional link]] between markdown files.
+[[#bimark]] is a tool to auto create [[bidirectional links]] between markdown files.
 
-Once the [[#bidirectional-link]] is created, you can use it to navigate between markdown files.
+Once the [[#bidirectional-links]] is created, you can use it to navigate between markdown files.
 ```
 
 ### Advanced Definition
