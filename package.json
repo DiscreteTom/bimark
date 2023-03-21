@@ -6,7 +6,7 @@
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc",
-    "prepublish": "yarn build"
+    "prepublish": "yarn test && yarn build"
   },
   "repository": "git@github.com:DiscreteTom/bimark.git",
   "author": "DiscreteTom <discrete_tom@outlook.com>",
