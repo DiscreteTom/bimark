@@ -2,7 +2,7 @@
 
 ## v0.1.1
 
-- Support `html` option in `render` function.
+- Add `ref.html` option in `render` function.
 
 ## v0.1.0
 
