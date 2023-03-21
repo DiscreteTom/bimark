@@ -8,7 +8,11 @@ Auto create [[bidirectional links]] between markdown files.
 ## Installation
 
 ```bash
+# for API usage
 npm install bimark
+
+# for CLI usage, see https://github.com/DiscreteTom/bimark-cli
+npm install -g bimark-cli
 ```
 
 ## Usage
@@ -27,13 +31,7 @@ Once bidirectional links are created, you can use it to navigate between markdow
 
 In the above example, `BiMark` and `bidirectional link` are definitions.
 
-Then, run `bimark <file>` to render the markdown documents:
-
-```sh
-bimark file.md
-```
-
-All definitions and references will be modified to add an id, and all references will be automatically replaced with links:
+After rendering, all definitions and references will be modified to add an id, and all references will be automatically replaced with links:
 
 ```md
 # <span id="bimark">BiMark</span>
@@ -110,3 +108,5 @@ bm.getReverseRefs({ name: "BiMark" }); // => ['file1.md#bimark-ref-1', 'file2.md
 - What characters are allowed in the id of a definition?
   - Regex: `[a-zA-Z0-9_-]`.
   - No, spaces are not allowed.
+
+## [CHANGELOG](https://github.com/DiscreteTom/bimark/blob/main/CHANGELOG.md)
