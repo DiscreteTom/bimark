@@ -57,12 +57,16 @@ export class BiMark {
 
           // check name/alias/id duplication
           if (this.name2def.has(name))
-            throw new Error(`Duplicate definition name: ${name}`);
+            throw new Error(
+              `Duplicate definition name: ${name} in file ${path}`
+            );
           if (this.id2def.has(id))
-            throw new Error(`Duplicate definition id: ${id}`);
+            throw new Error(`Duplicate definition id: ${id} in file ${path}`);
           alias.forEach((a) => {
             if (this.name2def.has(a))
-              throw new Error(`Duplicate definition name: ${a}`);
+              throw new Error(
+                `Duplicate definition name: ${a} in file ${path}`
+              );
           });
 
           this.name2def.set(name, def);
@@ -165,8 +169,12 @@ export class BiMark {
       ];
       matches.forEach((m, i, all) => {
         const def = m[1].startsWith("#")
-          ? this.id2def.get(m[1].slice(1))!
-          : this.name2def.get(m[1].slice(1))!; // TODO: check existence
+          ? this.id2def.get(m[1].slice(1))
+          : this.name2def.get(m[1].slice(1));
+
+        // check existence
+        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
+
         const escaped = m[1].startsWith("!");
         const start = m.index!;
         const end = m.index! + m[0].length;
