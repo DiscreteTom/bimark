@@ -6,7 +6,8 @@ export type Definition = {
   alias: string[];
   path: string;
   id: string;
-  refcount: number; // TODO: add reverse reference
+  /** Path list. */
+  refs: string[];
 };
 
 type Fragment = { content: string; skip: boolean };
@@ -50,7 +51,7 @@ export class BiMark {
           const name = m[1];
           const alias = m[2].split("|").slice(1);
           const id = m[4] ? m[4].slice(1) : name;
-          const def = { path, name, id, alias, refcount: 0 };
+          const def = { path, name, id, alias, refs: [] };
           // TODO: check name/alias/id duplication
           this.name2def.set(name, def);
           this.id2def.set(id, def);
@@ -133,6 +134,7 @@ export class BiMark {
   }
 
   private processExplicitOrEscapedReference(
+    path: string,
     fragments: Fragment[],
     options: { showBorder: boolean }
   ) {
@@ -183,10 +185,10 @@ export class BiMark {
             skip: true,
           });
         else {
-          def.refcount++;
+          def.refs.push(path);
           result.push({
             // for a explicit reference, show the name with a link
-            content: `[<span id="${def.id}-ref-${def.refcount}">${
+            content: `[<span id="${def.id}-ref-${def.refs.length}">${
               (options.showBorder ? "[[" : "") +
               def.name +
               (options.showBorder ? "]]" : "")
@@ -210,6 +212,7 @@ export class BiMark {
   }
 
   private processImplicitReference(
+    path: string,
     fragments: Fragment[],
     def: Definition,
     options: { showBorder: boolean }
@@ -245,9 +248,9 @@ export class BiMark {
             skip: false,
           });
         // append reference to result
-        def.refcount++;
+        def.refs.push(path);
         result.push({
-          content: `[<span id="${def.id}-ref-${def.refcount}">${
+          content: `[<span id="${def.id}-ref-${def.refs.length}">${
             (options.showBorder ? "[[" : "") +
             def.name +
             (options.showBorder ? "]]" : "")
@@ -269,7 +272,7 @@ export class BiMark {
     return result;
   }
 
-  private processText(s: string) {
+  private processText(path: string, s: string) {
     let fragments: { content: string; skip: boolean }[] = [
       { content: s, skip: false },
     ];
@@ -278,12 +281,12 @@ export class BiMark {
       showAlias: true,
       showBorder: true,
     });
-    fragments = this.processExplicitOrEscapedReference(fragments, {
+    fragments = this.processExplicitOrEscapedReference(path, fragments, {
       showBorder: true,
     });
 
     this.name2def.forEach((def) => {
-      fragments = this.processImplicitReference(fragments, def, {
+      fragments = this.processImplicitReference(path, fragments, def, {
         showBorder: false,
       });
     });
@@ -294,7 +297,7 @@ export class BiMark {
   /**
    * Render a markdown file based on the collected definitions.
    */
-  render(md: string) {
+  render(path: string, md: string) {
     const ast = remark.parse(md);
     visit(ast, (node) => {
       if ("children" in node) {
@@ -303,7 +306,7 @@ export class BiMark {
             const { type, value, ...rest } = c;
             return {
               type: "html", // use html node to avoid escaping
-              value: this.processText(c.value),
+              value: this.processText(path, c.value),
               ...rest,
             };
           } else return c;
@@ -317,6 +320,6 @@ export class BiMark {
    * Collect definitions from a markdown file then render it.
    */
   static singleFile(md: string, path = "") {
-    return new BiMark().collect(path, md).render(md);
+    return new BiMark().collect(path, md).render(path, md);
   }
 }
