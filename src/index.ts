@@ -281,8 +281,17 @@ export class BiMark {
   render(md: string) {
     const ast = remark.parse(md);
     visit(ast, (node) => {
-      if (node.type == "text") {
-        node.value = this.processText(node.value);
+      if ("children" in node) {
+        node.children = node.children.map((c) => {
+          if (c.type == "text") {
+            const { type, value, ...rest } = c;
+            return {
+              type: "html", // use html node to avoid escaping
+              value: this.processText(c.value),
+              ...rest,
+            };
+          } else return c;
+        });
       }
     });
     return remark.stringify(ast);
