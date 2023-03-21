@@ -152,7 +152,7 @@ export class BiMark {
   private processExplicitOrEscapedReference(
     path: string,
     fragments: Fragment[],
-    options: { showBrackets: boolean }
+    options: { showBrackets: boolean; html: boolean }
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -206,17 +206,20 @@ export class BiMark {
           });
         else {
           def.refs.push(path);
+          const span = `<span id="${this.refIdGenerator(
+            path,
+            def,
+            def.refs.length - 1
+          )}">${
+            (options.showBrackets ? "[[" : "") +
+            def.name +
+            (options.showBrackets ? "]]" : "")
+          }</span>`;
           result.push({
             // for a explicit reference, show the name with a link
-            content: `[<span id="${this.refIdGenerator(
-              path,
-              def,
-              def.refs.length - 1
-            )}">${
-              (options.showBrackets ? "[[" : "") +
-              def.name +
-              (options.showBrackets ? "]]" : "")
-            }</span>](${def.path}#${def.id})`,
+            content: options.html
+              ? `<a href="${def.path}#${def.id}">${span}</a>`
+              : `[${span}](${def.path}#${def.id})`,
             skip: true,
           });
         }
@@ -241,7 +244,7 @@ export class BiMark {
     def: Definition,
     /** name or alias */
     content: string,
-    options: { showBrackets: boolean }
+    options: { showBrackets: boolean; html: boolean }
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -276,16 +279,19 @@ export class BiMark {
           });
         // append reference to result
         def.refs.push(path);
+        const span = `<span id="${this.refIdGenerator(
+          path,
+          def,
+          def.refs.length - 1
+        )}">${
+          (options.showBrackets ? "[[" : "") +
+          content + // don't use def.name here, because it may be an alias
+          (options.showBrackets ? "]]" : "")
+        }</span>`;
         result.push({
-          content: `[<span id="${this.refIdGenerator(
-            path,
-            def,
-            def.refs.length - 1
-          )}">${
-            (options.showBrackets ? "[[" : "") +
-            content + // don't use def.name here, because it may be an alias
-            (options.showBrackets ? "]]" : "")
-          }</span>](${def.path}#${def.id})`,
+          content: options.html
+            ? `<a href="${def.path}#${def.id}">${span}</a>`
+            : `[${span}](${def.path}#${def.id})`,
           skip: true,
         });
         // append after to result if this is the last match
@@ -308,7 +314,7 @@ export class BiMark {
     s: string,
     options: {
       def: { showAlias: boolean; showBrackets: boolean };
-      ref: { showBrackets: boolean };
+      ref: { showBrackets: boolean; html: boolean };
     }
   ) {
     let fragments: { content: string; skip: boolean }[] = [
@@ -321,11 +327,13 @@ export class BiMark {
     });
     fragments = this.processExplicitOrEscapedReference(path, fragments, {
       showBrackets: options.ref.showBrackets,
+      html: options.ref.html,
     });
 
     this.name2def.forEach((def, content) => {
       fragments = this.processImplicitReference(path, fragments, def, content, {
         showBrackets: options.ref.showBrackets,
+        html: options.ref.html,
       });
     });
 
@@ -340,7 +348,7 @@ export class BiMark {
     md: string,
     options?: {
       def?: { showAlias?: boolean; showBrackets?: boolean };
-      ref?: { showBrackets?: boolean };
+      ref?: { showBrackets?: boolean; html?: boolean };
     }
   ) {
     const ast = remark.parse(md);
@@ -356,7 +364,10 @@ export class BiMark {
                   showAlias: options?.def?.showAlias ?? false,
                   showBrackets: options?.def?.showBrackets ?? false,
                 },
-                ref: { showBrackets: options?.ref?.showBrackets ?? false },
+                ref: {
+                  showBrackets: options?.ref?.showBrackets ?? false,
+                  html: options?.ref?.html ?? false,
+                },
               }),
               ...rest,
             };
@@ -375,7 +386,7 @@ export class BiMark {
     options?: {
       path?: string;
       def?: { showAlias?: boolean; showBrackets?: boolean };
-      ref?: { showBrackets?: boolean };
+      ref?: { showBrackets?: boolean; html?: boolean };
     }
   ) {
     const path = options?.path ?? "";
