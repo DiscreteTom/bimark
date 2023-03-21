@@ -221,6 +221,8 @@ export class BiMark {
     path: string,
     fragments: Fragment[],
     def: Definition,
+    /** name or alias */
+    content: string,
     options: { showBrackets: boolean }
   ) {
     const result: Fragment[] = [];
@@ -230,8 +232,9 @@ export class BiMark {
         return;
       }
 
-      const matches = [...f.content.matchAll(new RegExp(def.name, "g"))];
+      const matches = [...f.content.matchAll(new RegExp(content, "g"))];
       matches.forEach((m, i, all) => {
+        const matched = m[0];
         const start = m.index!;
         const end = m.index! + m[0].length;
         const before = f.content.slice(
@@ -262,7 +265,7 @@ export class BiMark {
             def.refs.length - 1
           )}">${
             (options.showBrackets ? "[[" : "") +
-            def.name +
+            content + // don't use def.name here, because it may be an alias
             (options.showBrackets ? "]]" : "")
           }</span>](${def.path}#${def.id})`,
           skip: true,
@@ -302,8 +305,8 @@ export class BiMark {
       showBrackets: options.ref.showBrackets,
     });
 
-    this.name2def.forEach((def) => {
-      fragments = this.processImplicitReference(path, fragments, def, {
+    this.name2def.forEach((def, content) => {
+      fragments = this.processImplicitReference(path, fragments, def, content, {
         showBrackets: options.ref.showBrackets,
       });
     });
