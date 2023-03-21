@@ -1,17 +1,21 @@
 {
   "include": ["src"],
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2022",
     "outDir": "out",
-    "module": "CommonJS",
+    "module": "ES2022",
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "lib": ["ESNext"]
+    "sourceMap": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   }
 }

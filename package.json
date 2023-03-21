@@ -2,6 +2,7 @@
   "name": "bimark",
   "version": "0.1.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "build": "tsc"
