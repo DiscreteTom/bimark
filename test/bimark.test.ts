@@ -92,6 +92,12 @@ test("complex render with options", () => {
   expect(
     bm.render("", "BiMark", { ref: { html: true, showBrackets: true } }).trim()
   ).toBe(`<a href="#bimark"><span id="bimark-ref-5">[[BiMark]]</span></a>`);
+  expect(bm.render("", "BiMark", { output: { html: true } }).trim()).toBe(
+    `<p><a href="#bimark"><span id="bimark-ref-6">BiMark</span></a></p>`
+  );
+  expect(bm.render("", "# BiMark", { output: { html: true } }).trim()).toBe(
+    `<h1><a href="#bimark"><span id="bimark-ref-7">BiMark</span></a></h1>`
+  );
 });
 
 test("reverse ref", () => {

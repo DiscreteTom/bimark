@@ -1,6 +1,23 @@
 import { remark } from "remark";
 import { visit } from "unist-util-visit";
 import { BiDoc } from "./bidoc";
+import rehypeStringify from "rehype-stringify";
+import remark2rehype from "remark-rehype";
+import { unified } from "unified";
+
+export type BiMarkRenderOptions = {
+  def?: {
+    showAlias?: boolean;
+    showBrackets?: boolean;
+  };
+  ref?: {
+    showBrackets?: boolean;
+    html?: boolean;
+  };
+  output?: {
+    html?: boolean;
+  };
+};
 
 export class BiMark extends BiDoc {
   constructor(
@@ -24,14 +41,7 @@ export class BiMark extends BiDoc {
   /**
    * Render a markdown file based on the collected definitions.
    */
-  render(
-    path: string,
-    md: string,
-    options?: {
-      def?: { showAlias?: boolean; showBrackets?: boolean };
-      ref?: { showBrackets?: boolean; html?: boolean };
-    }
-  ) {
+  render(path: string, md: string, options?: BiMarkRenderOptions) {
     const ast = remark.parse(md);
     visit(ast, (node) => {
       if ("children" in node) {
@@ -65,7 +75,7 @@ export class BiMark extends BiDoc {
                     name + // don't use def.name here, because it may be an alias
                     (options?.ref?.showBrackets ? "]]" : "")
                   }</span>`;
-                  return options?.ref?.html
+                  return options?.ref?.html || options?.output?.html
                     ? `<a href="${def.path}#${def.id}">${span}</a>`
                     : `[${span}](${def.path}#${def.id})`;
                 }
@@ -76,6 +86,16 @@ export class BiMark extends BiDoc {
         });
       }
     });
+
+    if (options?.output?.html)
+      return unified()
+        .use(rehypeStringify, { allowDangerousHtml: true })
+        .stringify(
+          unified()
+            .use(remark2rehype, { allowDangerousHtml: true })
+            .runSync(ast) as any // TODO: how to type this?
+        );
+
     return remark.stringify(ast);
   }
 
@@ -86,9 +106,7 @@ export class BiMark extends BiDoc {
     md: string,
     options?: {
       path?: string;
-      def?: { showAlias?: boolean; showBrackets?: boolean };
-      ref?: { showBrackets?: boolean; html?: boolean };
-    }
+    } & BiMarkRenderOptions
   ) {
     const path = options?.path ?? "";
     return new BiMark().collect(path, md).render(path, md, options);
