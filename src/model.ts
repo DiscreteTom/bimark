@@ -41,3 +41,10 @@ export type FragmentProcessor = (
   position: Position,
   index: number
 ) => Pick<Fragment, "content" | "skip">;
+
+export type DefIdGenerator = (name: string) => string;
+export type RefIdGenerator = (
+  path: string,
+  def: Definition,
+  index: number
+) => string;

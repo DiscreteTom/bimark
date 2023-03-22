@@ -1,4 +1,5 @@
 import {
+  DefIdGenerator,
   Definition,
   Fragment,
   FragmentProcessor,
@@ -85,7 +86,7 @@ export class BiParser {
     text: string,
     path: string,
     position: Position,
-    defIdGenerator: (name: string) => string
+    defIdGenerator: DefIdGenerator
   ) {
     return this.collectDefinitionFromFragments(
       this.initFragments(text, position),
@@ -97,7 +98,7 @@ export class BiParser {
   static collectDefinitionFromFragments(
     fragments: Fragment[],
     path: string,
-    defIdGenerator: (name: string) => string
+    defIdGenerator: DefIdGenerator
   ) {
     const defs: (Pick<Definition, "name" | "alias" | "id"> & {
       index: number;

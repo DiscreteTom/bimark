@@ -1,7 +1,13 @@
 import { remark } from "remark";
 import { visit } from "unist-util-visit";
 import uslug from "uslug";
-import { Definition, Fragment, Position } from "./model";
+import {
+  DefIdGenerator,
+  Definition,
+  Fragment,
+  Position,
+  RefIdGenerator,
+} from "./model";
 import { BiParser } from "./parser";
 
 export class BiMark {
@@ -9,12 +15,8 @@ export class BiMark {
   readonly name2def: Map<string, Definition>;
   /** id => Definition */
   readonly id2def: Map<string, Definition>;
-  readonly defIdGenerator: (name: string) => string;
-  readonly refIdGenerator: (
-    path: string,
-    def: Definition,
-    index: number
-  ) => string;
+  readonly defIdGenerator: DefIdGenerator;
+  readonly refIdGenerator: RefIdGenerator;
 
   constructor(
     options?: Partial<Pick<BiMark, "refIdGenerator" | "defIdGenerator">>
