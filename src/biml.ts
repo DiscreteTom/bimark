@@ -3,7 +3,7 @@ import { unified } from "unified";
 import rehypeStringify from "rehype-stringify";
 import { BiDoc } from "./bidoc";
 import { selectAll } from "hast-util-select";
-import { Text } from "hast";
+import { Element, Text } from "hast";
 
 export type BiMLRenderOptions = {
   def?: {
@@ -73,58 +73,64 @@ export class BiML extends BiDoc {
     const refSelectors = options?.ref?.selectors ?? defSelectors;
 
     const ast = rehype.parse(md);
-    const targets = new Set<Text>(); // avoid processing the same text node twice
+    /** text=>{parent,index}, avoid processing the same text node twice */
+    const targets = new Map<Text, { parent: Element; index: number }>();
 
     // collect all targets
     defSelectors.forEach((s) => {
       selectAll(s, ast).forEach((node) => {
-        node.children.forEach((c) => {
-          if (c.type == "text") targets.add(c);
+        node.children.forEach((c, i) => {
+          if (c.type == "text") targets.set(c, { parent: node, index: i });
         });
       });
     });
     refSelectors.forEach((s) => {
       selectAll(s, ast).forEach((node) => {
-        node.children.forEach((c) => {
-          if (c.type == "text") targets.add(c);
+        node.children.forEach((c, i) => {
+          if (c.type == "text") targets.set(c, { parent: node, index: i });
         });
       });
     });
 
     // render
-    targets.forEach((c) => {
-      c.value = this.renderText(
-        path,
-        c.value,
-        c.position!,
-        // def renderer
-        (d) =>
-          `<span id="${d.id}">${
-            (options?.def?.showBrackets ? "[[" : "") +
-            d.name +
-            (options?.def?.showAlias && d.alias.length > 0
-              ? "|" + d.alias.join("|")
-              : "") +
-            (options?.def?.showBrackets ? "]]" : "")
-          }</span>`,
-        // ref renderer
-        (def, name) => {
-          const span = `<span id="${this.refIdGenerator(
-            path,
-            def,
-            def.refs.length - 1
-          )}">${
-            (options?.ref?.showBrackets ? "[[" : "") +
-            name + // don't use def.name here, because it may be an alias
-            (options?.ref?.showBrackets ? "]]" : "")
-          }</span>`;
-          return `<a href="${def.path}#${def.id}">${span}</a>`;
-        }
-      );
+    targets.forEach(({ parent, index }, c) => {
+      parent.children[index] = {
+        type: "raw",
+        value: this.renderText(
+          path,
+          c.value,
+          c.position!,
+          // def renderer
+          (d) =>
+            `<span id="${d.id}">${
+              (options?.def?.showBrackets ? "[[" : "") +
+              d.name +
+              (options?.def?.showAlias && d.alias.length > 0
+                ? "|" + d.alias.join("|")
+                : "") +
+              (options?.def?.showBrackets ? "]]" : "")
+            }</span>`,
+          // ref renderer
+          (def, name) => {
+            const span = `<span id="${this.refIdGenerator(
+              path,
+              def,
+              def.refs.length - 1
+            )}">${
+              (options?.ref?.showBrackets ? "[[" : "") +
+              name + // don't use def.name here, because it may be an alias
+              (options?.ref?.showBrackets ? "]]" : "")
+            }</span>`;
+            return `<a href="${def.path}#${def.id}">${span}</a>`;
+          }
+        ),
+      };
     });
 
     return unified()
-      .use(rehypeStringify, { allowDangerousHtml: true })
+      .use(rehypeStringify, {
+        allowDangerousHtml: true,
+      })
       .stringify(ast);
   }
 
