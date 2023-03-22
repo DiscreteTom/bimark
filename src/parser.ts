@@ -1,5 +1,4 @@
 import {
-  DefIdGenerator,
   Definition,
   Fragment,
   FragmentProcessor,
