@@ -2,7 +2,7 @@
 
 ## v0.1.2
 
-- Add `Definition.position`.
+- Add `Definition.fragment`.
 - Optimize code.
 
 ## v0.1.1

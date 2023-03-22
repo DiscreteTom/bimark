@@ -26,8 +26,7 @@ export interface Definition {
   id: string;
   /** Path list. */
   refs: string[];
-  /** Position in the original file. */
-  position: Position;
+  fragment: Fragment;
 }
 
 export type Fragment = {
@@ -36,3 +35,9 @@ export type Fragment = {
   /** Position in the original file. */
   position: Position;
 };
+
+export type FragmentProcessor = (
+  m: RegExpMatchArray,
+  position: Position,
+  index: number
+) => Pick<Fragment, "content" | "skip">;
