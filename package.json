@@ -11,6 +11,7 @@
   "author": "DiscreteTom <discrete_tom@outlook.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/hast": "^2.3.4",
     "@types/jest": "^29.4.4",
     "@types/node": "^18.15.3",
     "@types/uslug": "^1.0.1",
@@ -21,6 +22,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "hast-util-select": "^5.0.5",
     "rehype": "^12.0.1",
     "rehype-stringify": "^9.0.3",
     "remark": "^14.0.2",

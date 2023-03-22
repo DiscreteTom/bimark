@@ -3,8 +3,8 @@
 ## v0.1.2
 
 - Add `BiDoc` class.
-- Add `Definition.fragment`.
 - Add `out.html` option in `render` function.
+- Add `BiML` to parse & render HTML.
 - Optimize code.
 
 ## v0.1.1
