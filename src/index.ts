@@ -2,14 +2,28 @@ import { remark } from "remark";
 import { visit } from "unist-util-visit";
 import uslug from "uslug";
 
-export type Position = {
+export interface Point {
   /** from 1 */
   line: number;
   /** from 1 */
   column: number;
-};
+}
 
-export type Definition = {
+export interface Position {
+  start: Point;
+  /** End is included. */
+  end: Point;
+}
+
+function shift(p: Point, offset: string) {
+  const lines = offset.split("\n");
+  return {
+    line: p.line + lines.length - 1,
+    column: lines.length == 1 ? p.column + offset.length : lines.at(-1)!.length,
+  };
+}
+
+export interface Definition {
   name: string;
   alias: string[];
   path: string;
@@ -17,14 +31,15 @@ export type Definition = {
   /** Path list. */
   refs: string[];
   /** Position in the original file. */
-  position: {
-    start: Position;
-    /** End is included. */
-    end: Position;
-  };
-};
+  position: Position;
+}
 
-type Fragment = { content: string; skip: boolean };
+type Fragment = {
+  content: string;
+  skip: boolean;
+  /** Position in the original file. */
+  position: Position;
+};
 
 export class BiMark {
   /** name/alias => Definition */
@@ -57,51 +72,34 @@ export class BiMark {
     const ast = remark.parse(md);
     visit(ast, (node) => {
       if (node.type == "text") {
-        [
-          ...node.value.matchAll(
-            // [[name|alias1|alias2:ID]]
-            /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g
-          ),
-        ].forEach((m) => {
-          const name = m[1];
-          const alias = m[2].split("|").slice(1);
-          const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
+        let fragments: Fragment[] = [
+          { content: node.value, skip: false, position: node.position! },
+        ];
+        const res = this.collectDefinition(fragments);
+        res.defs.forEach((d) => {
           const def: Definition = {
             path,
-            name,
-            id,
-            alias,
+            ...d,
             refs: [],
-            position: {
-              start: {
-                line: node.position!.start.line,
-                column: node.position!.start.column + m.index!,
-              },
-              end: {
-                line: node.position!.start.line,
-                column:
-                  node.position!.start.column + m.index! + m[0].length - 1,
-              },
-            },
+            position: res.fragments[d.index].position,
           };
-
           // check name/alias/id duplication
-          if (this.name2def.has(name))
+          if (this.name2def.has(d.name))
             throw new Error(
-              `Duplicate definition name: ${name} in file ${path}`
+              `Duplicate definition name: ${d.name} in file ${path}`
             );
-          if (this.id2def.has(id))
-            throw new Error(`Duplicate definition id: ${id} in file ${path}`);
-          alias.forEach((a) => {
+          if (this.id2def.has(d.id))
+            throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
+          d.alias.forEach((a) => {
             if (this.name2def.has(a))
               throw new Error(
                 `Duplicate definition name: ${a} in file ${path}`
               );
           });
 
-          this.name2def.set(name, def);
-          this.id2def.set(id, def);
-          alias.forEach((a) => {
+          this.name2def.set(d.name, def);
+          this.id2def.set(d.id, def);
+          d.alias.forEach((a) => {
             this.name2def.set(a, def);
           });
         });
@@ -110,10 +108,14 @@ export class BiMark {
     return this;
   }
 
-  private processFragments(
+  private static processFragments(
     fragments: Fragment[],
     regex: RegExp,
-    processor: (m: RegExpMatchArray) => Fragment
+    processor: (
+      m: RegExpMatchArray,
+      position: Position,
+      index: number
+    ) => Pick<Fragment, "content" | "skip">
   ) {
     const result: Fragment[] = [];
     fragments.forEach((f) => {
@@ -140,19 +142,36 @@ export class BiMark {
         );
 
         // append before to result
-        if (before.length > 0)
+        if (before.length > 0) {
           result.push({
             content: before,
             skip: false,
+            position: {
+              start: f.position.start,
+              end: shift(f.position.start, before.slice(1)),
+            },
           });
+        }
         // append process result
-        result.push(processor(m));
+        const position = {
+          start: shift(f.position.start, before.slice(1)),
+          end: shift(f.position.start, (before + m[0]).slice(1)),
+        };
+        result.push({
+          ...processor(m, position, result.length),
+          position,
+        });
         // append after to result if this is the last match
-        if (i == all.length - 1 && after.length > 0)
+        if (i == all.length - 1 && after.length > 0) {
           result.push({
             content: after,
             skip: false,
+            position: {
+              start: shift(f.position.start, (before + m[0]).slice(1)),
+              end: f.position.end,
+            },
           });
+        }
       });
 
       if (matches.length == 0) {
@@ -162,31 +181,50 @@ export class BiMark {
     return result;
   }
 
+  private collectDefinition(fragments: Fragment[]) {
+    const defs: (Pick<Definition, "name" | "alias" | "id" | "position"> & {
+      index: number;
+    })[] = [];
+
+    return {
+      fragments: BiMark.processFragments(
+        fragments,
+        // [[name|alias1|alias2:ID]]
+        /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g,
+        (m, position, index) => {
+          const name = m[1];
+          const alias = m[2].split("|").slice(1);
+          const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
+          const partial = {
+            content: m[0],
+            skip: true,
+          };
+          defs.push({ name, alias, id, position, index });
+          return partial;
+        }
+      ),
+      defs,
+    };
+  }
+
   private renderDefinition(
     fragments: Fragment[],
     options: { showBrackets: boolean; showAlias: boolean }
   ) {
-    return this.processFragments(
-      fragments,
-      // [[name|alias1|alias2:ID]]
-      /\[\[([ a-zA-Z0-9_-]+)((\|[ a-zA-Z0-9_-]+)*)(:[a-zA-Z0-9_-]+)?\]\]/g,
-      (m) => {
-        const name = m[1];
-        const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : this.defIdGenerator(name);
-        return {
-          content: `<span id="${id}">${
-            (options.showBrackets ? "[[" : "") +
-            name +
-            (options.showAlias && alias.length > 0
-              ? "|" + alias.join("|")
-              : "") +
-            (options.showBrackets ? "]]" : "")
-          }</span>`,
-          skip: true,
-        };
-      }
-    );
+    const res = this.collectDefinition(fragments);
+    res.defs.forEach((d) => {
+      const f = res.fragments[d.index];
+      f.content = `<span id="${d.id}">${
+        (options.showBrackets ? "[[" : "") +
+        d.name +
+        (options.showAlias && d.alias.length > 0
+          ? "|" + d.alias.join("|")
+          : "") +
+        (options.showBrackets ? "]]" : "")
+      }</span>`;
+    });
+
+    return res.fragments;
   }
 
   private renderExplicitOrEscapedReference(
@@ -194,7 +232,7 @@ export class BiMark {
     fragments: Fragment[],
     options: { showBrackets: boolean; html: boolean }
   ) {
-    return this.processFragments(
+    return BiMark.processFragments(
       fragments,
       // [[#id]] or [[!name]]
       /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
@@ -244,7 +282,7 @@ export class BiMark {
     content: string,
     options: { showBrackets: boolean; html: boolean }
   ) {
-    return this.processFragments(fragments, new RegExp(content, "g"), (m) => {
+    return BiMark.processFragments(fragments, new RegExp(content, "g"), (m) => {
       def.refs.push(path);
       const span = `<span id="${this.refIdGenerator(
         path,
@@ -267,14 +305,13 @@ export class BiMark {
   private renderText(
     path: string,
     s: string,
+    position: Position,
     options: {
       def: { showAlias: boolean; showBrackets: boolean };
       ref: { showBrackets: boolean; html: boolean };
     }
   ) {
-    let fragments: { content: string; skip: boolean }[] = [
-      { content: s, skip: false },
-    ];
+    let fragments: Fragment[] = [{ content: s, skip: false, position }];
 
     fragments = this.renderDefinition(fragments, {
       showAlias: options.def.showAlias,
@@ -314,7 +351,7 @@ export class BiMark {
             const { type, value, ...rest } = c;
             return {
               type: "html", // use html node to avoid escaping
-              value: this.renderText(path, c.value, {
+              value: this.renderText(path, c.value, c.position!, {
                 def: {
                   showAlias: options?.def?.showAlias ?? false,
                   showBrackets: options?.def?.showBrackets ?? false,
