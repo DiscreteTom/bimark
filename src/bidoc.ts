@@ -77,35 +77,23 @@ export class BiDoc {
     fragments: Fragment[],
     renderer: RefRenderer
   ) {
-    return BiParser.processFragments(
+    const res = BiParser.collectExplicitOrEscapedReference(
       fragments,
-      // [[#id]] or [[!name]]
-      /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
-      (m) => {
-        const def = m[1].startsWith("#")
-          ? this.id2def.get(m[1].slice(1))
-          : this.name2def.get(m[1].slice(1));
-        // check existence
-        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
-
-        const escaped = m[1].startsWith("!");
-
-        if (escaped)
-          return {
-            // for an escaped reference, just show the name
-            content: def.name,
-            skip: true,
-          };
-        else {
-          def.refs.push(path);
-          return {
-            // for a explicit reference, show the name with a link
-            content: renderer(def, def.name),
-            skip: true,
-          };
-        }
-      }
+      path,
+      this.name2def,
+      this.id2def
     );
+    res.refs.forEach((r) => {
+      if (r.type == "explicit") {
+        r.def.refs.push(path);
+        r.fragment.content = renderer(r.def, r.def.name);
+      } else {
+        // escaped, just show the name
+        r.fragment.content = r.def.name;
+      }
+    });
+
+    return res.fragments;
   }
 
   private renderImplicitReference(
@@ -116,13 +104,13 @@ export class BiDoc {
     name: string,
     renderer: RefRenderer
   ) {
-    return BiParser.processFragments(fragments, new RegExp(name, "g"), (m) => {
+    const res = BiParser.collectImplicitReference(fragments, name);
+    res.refs.forEach((r) => {
       def.refs.push(path);
-      return {
-        content: renderer(def, name),
-        skip: true,
-      };
+      r.content = renderer(def, name);
     });
+
+    return res.fragments;
   }
 
   protected renderText(

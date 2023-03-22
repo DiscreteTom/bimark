@@ -133,4 +133,78 @@ export class BiParser {
       ),
     };
   }
+
+  static collectExplicitOrEscapedReference(
+    fragments: Fragment[],
+    path: string,
+    name2def: ReadonlyMap<string, Definition>,
+    id2def: ReadonlyMap<string, Definition>
+  ) {
+    const refs: {
+      type: "explicit" | "escaped";
+      index: number;
+      def: Definition;
+    }[] = [];
+
+    fragments = this.processFragments(
+      fragments,
+      // [[#id]] or [[!name]]
+      /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
+      (m, position, index) => {
+        const type = m[1].startsWith("#") ? "explicit" : "escaped";
+        const def =
+          type == "explicit"
+            ? id2def.get(m[1].slice(1))
+            : name2def.get(m[1].slice(1));
+        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
+
+        refs.push({ type, def, index });
+
+        return {
+          content: m[0],
+          skip: true,
+        };
+      }
+    );
+
+    return {
+      fragments,
+      refs: refs.map(
+        (r) =>
+          ({
+            ...r,
+            fragment: fragments[r.index],
+          } as {
+            type: "explicit" | "escaped";
+            def: Definition;
+            fragment: Fragment;
+          })
+      ),
+    };
+  }
+
+  static collectImplicitReference(
+    fragments: Fragment[],
+    /** name or alias */
+    name: string
+  ) {
+    const refs: number[] = [];
+
+    fragments = BiParser.processFragments(
+      fragments,
+      new RegExp(name, "g"),
+      (m, position, index) => {
+        refs.push(index);
+        return {
+          content: m[0],
+          skip: true,
+        };
+      }
+    );
+
+    return {
+      fragments,
+      refs: refs.map((i) => fragments[i]),
+    };
+  }
 }
