@@ -1,8 +1,6 @@
 import { remark } from "remark";
 import { visit } from "unist-util-visit";
 import { BiDoc } from "./bidoc";
-import { Definition, Fragment, Position, RefIdGenerator } from "./model";
-import { BiParser } from "./parser";
 
 export class BiMark extends BiDoc {
   constructor(
@@ -11,117 +9,16 @@ export class BiMark extends BiDoc {
     super(options);
   }
 
-  protected parseTextNode(
-    content: string,
-    cb: (text: string, position: Position) => void
-  ): void {
+  /**
+   * Collect definitions from a markdown document.
+   */
+  collect(path: string, content: string) {
     const ast = remark.parse(content);
     visit(ast, (node) => {
-      if (node.type == "text") cb(node.value, node.position!);
+      if (node.type == "text")
+        this.collectDefinition(node.value, path, node.position!);
     });
-  }
-
-  protected renderDefinition(
-    path: string,
-    fragments: Fragment[],
-    options: { showBrackets: boolean; showAlias: boolean }
-  ) {
-    const res = BiParser.collectDefinitionFromFragments(
-      fragments,
-      path,
-      this.defIdGenerator
-    );
-    res.defs.forEach((d) => {
-      d.fragment.content = `<span id="${d.id}">${
-        (options.showBrackets ? "[[" : "") +
-        d.name +
-        (options.showAlias && d.alias.length > 0
-          ? "|" + d.alias.join("|")
-          : "") +
-        (options.showBrackets ? "]]" : "")
-      }</span>`;
-    });
-
-    return res.fragments;
-  }
-
-  protected renderExplicitOrEscapedReference(
-    path: string,
-    fragments: Fragment[],
-    options: { showBrackets: boolean; html: boolean }
-  ) {
-    return BiParser.processFragments(
-      fragments,
-      // [[#id]] or [[!name]]
-      /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
-      (m) => {
-        const def = m[1].startsWith("#")
-          ? this.id2def.get(m[1].slice(1))
-          : this.name2def.get(m[1].slice(1));
-        // check existence
-        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
-
-        const escaped = m[1].startsWith("!");
-
-        if (escaped)
-          return {
-            // for an escaped reference, just show the name
-            content: def.name,
-            skip: true,
-          };
-        else {
-          def.refs.push(path);
-          const span = `<span id="${this.refIdGenerator(
-            path,
-            def,
-            def.refs.length - 1
-          )}">${
-            (options.showBrackets ? "[[" : "") +
-            def.name +
-            (options.showBrackets ? "]]" : "")
-          }</span>`;
-          return {
-            // for a explicit reference, show the name with a link
-            content: options.html
-              ? `<a href="${def.path}#${def.id}">${span}</a>`
-              : `[${span}](${def.path}#${def.id})`,
-            skip: true,
-          };
-        }
-      }
-    );
-  }
-
-  protected renderImplicitReference(
-    path: string,
-    fragments: Fragment[],
-    def: Definition,
-    /** name or alias */
-    content: string,
-    options: { showBrackets: boolean; html: boolean }
-  ) {
-    return BiParser.processFragments(
-      fragments,
-      new RegExp(content, "g"),
-      (m) => {
-        def.refs.push(path);
-        const span = `<span id="${this.refIdGenerator(
-          path,
-          def,
-          def.refs.length - 1
-        )}">${
-          (options.showBrackets ? "[[" : "") +
-          content + // don't use def.name here, because it may be an alias
-          (options.showBrackets ? "]]" : "")
-        }</span>`;
-        return {
-          content: options.html
-            ? `<a href="${def.path}#${def.id}">${span}</a>`
-            : `[${span}](${def.path}#${def.id})`,
-          skip: true,
-        };
-      }
-    );
+    return this;
   }
 
   /**
@@ -143,16 +40,36 @@ export class BiMark extends BiDoc {
             const { type, value, ...rest } = c;
             return {
               type: "html", // use html node to avoid escaping
-              value: this.renderText(path, c.value, c.position!, {
-                def: {
-                  showAlias: options?.def?.showAlias ?? false,
-                  showBrackets: options?.def?.showBrackets ?? false,
-                },
-                ref: {
-                  showBrackets: options?.ref?.showBrackets ?? false,
-                  html: options?.ref?.html ?? false,
-                },
-              }),
+              value: this.renderText(
+                path,
+                c.value,
+                c.position!,
+                // def renderer
+                (d) =>
+                  `<span id="${d.id}">${
+                    (options?.def?.showBrackets ? "[[" : "") +
+                    d.name +
+                    (options?.def?.showAlias && d.alias.length > 0
+                      ? "|" + d.alias.join("|")
+                      : "") +
+                    (options?.def?.showBrackets ? "]]" : "")
+                  }</span>`,
+                // ref renderer
+                (def, name) => {
+                  const span = `<span id="${this.refIdGenerator(
+                    path,
+                    def,
+                    def.refs.length - 1
+                  )}">${
+                    (options?.ref?.showBrackets ? "[[" : "") +
+                    name + // don't use def.name here, because it may be an alias
+                    (options?.ref?.showBrackets ? "]]" : "")
+                  }</span>`;
+                  return options?.ref?.html
+                    ? `<a href="${def.path}#${def.id}">${span}</a>`
+                    : `[${span}](${def.path}#${def.id})`;
+                }
+              ),
               ...rest,
             };
           } else return c;

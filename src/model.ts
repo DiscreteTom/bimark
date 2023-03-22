@@ -48,3 +48,6 @@ export type RefIdGenerator = (
   def: Definition,
   index: number
 ) => string;
+
+export type DefRenderer = (def: Definition) => string;
+export type RefRenderer = (def: Definition, name: string) => string;

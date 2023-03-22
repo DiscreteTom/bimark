@@ -3,12 +3,14 @@ import {
   Definition,
   DefIdGenerator,
   RefIdGenerator,
-  Fragment,
   Position,
+  Fragment,
+  DefRenderer,
+  RefRenderer,
 } from "./model";
 import { BiParser } from "./parser";
 
-export abstract class BiDoc {
+export class BiDoc {
   /** name/alias => Definition */
   readonly name2def: Map<string, Definition>;
   /** id => Definition */
@@ -28,107 +30,129 @@ export abstract class BiDoc {
     this.id2def = new Map();
   }
 
-  protected abstract parseTextNode(
-    node: any,
-    cb: (text: string, position: Position) => void
-  ): void;
+  protected collectDefinition(text: string, path: string, position: Position) {
+    return BiParser.collectDefinition(
+      text,
+      path,
+      position,
+      this.defIdGenerator
+    ).defs.forEach((d) => {
+      // check name/alias/id duplication
+      if (this.name2def.has(d.name))
+        throw new Error(`Duplicate definition name: ${d.name} in file ${path}`);
+      if (this.id2def.has(d.id))
+        throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
+      d.alias.forEach((a) => {
+        if (this.name2def.has(a))
+          throw new Error(`Duplicate definition name: ${a} in file ${path}`);
+      });
 
-  /**
-   * Collect definitions from a document.
-   */
-  collect(path: string, content: string) {
-    this.parseTextNode(content, (text, position) => {
-      BiParser.collectDefinition(
-        text,
-        path,
-        position,
-        this.defIdGenerator
-      ).defs.forEach((d) => {
-        // check name/alias/id duplication
-        if (this.name2def.has(d.name))
-          throw new Error(
-            `Duplicate definition name: ${d.name} in file ${path}`
-          );
-        if (this.id2def.has(d.id))
-          throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
-        d.alias.forEach((a) => {
-          if (this.name2def.has(a))
-            throw new Error(`Duplicate definition name: ${a} in file ${path}`);
-        });
-
-        this.name2def.set(d.name, d);
-        this.id2def.set(d.id, d);
-        d.alias.forEach((a) => {
-          this.name2def.set(a, d);
-        });
+      this.name2def.set(d.name, d);
+      this.id2def.set(d.id, d);
+      d.alias.forEach((a) => {
+        this.name2def.set(a, d);
       });
     });
-
-    return this;
   }
 
-  protected abstract renderDefinition(
+  private renderDefinition(
     path: string,
     fragments: Fragment[],
-    options: { showBrackets: boolean; showAlias: boolean }
-  ): Fragment[];
+    renderer: DefRenderer
+  ) {
+    const res = BiParser.collectDefinitionFromFragments(
+      fragments,
+      path,
+      this.defIdGenerator
+    );
+    res.defs.forEach((d) => {
+      d.fragment.content = renderer(d);
+    });
 
-  protected abstract renderExplicitOrEscapedReference(
+    return res.fragments;
+  }
+
+  private renderExplicitOrEscapedReference(
     path: string,
     fragments: Fragment[],
-    options: { showBrackets: boolean; html: boolean }
-  ): Fragment[];
+    renderer: RefRenderer
+  ) {
+    return BiParser.processFragments(
+      fragments,
+      // [[#id]] or [[!name]]
+      /\[\[((#[a-zA-Z0-9_-]+)|(![ a-zA-Z0-9_-]+))\]\]/g,
+      (m) => {
+        const def = m[1].startsWith("#")
+          ? this.id2def.get(m[1].slice(1))
+          : this.name2def.get(m[1].slice(1));
+        // check existence
+        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
 
-  protected abstract renderImplicitReference(
+        const escaped = m[1].startsWith("!");
+
+        if (escaped)
+          return {
+            // for an escaped reference, just show the name
+            content: def.name,
+            skip: true,
+          };
+        else {
+          def.refs.push(path);
+          return {
+            // for a explicit reference, show the name with a link
+            content: renderer(def, def.name),
+            skip: true,
+          };
+        }
+      }
+    );
+  }
+
+  private renderImplicitReference(
     path: string,
     fragments: Fragment[],
     def: Definition,
     /** name or alias */
-    content: string,
-    options: { showBrackets: boolean; html: boolean }
-  ): Fragment[];
+    name: string,
+    renderer: RefRenderer
+  ) {
+    return BiParser.processFragments(fragments, new RegExp(name, "g"), (m) => {
+      def.refs.push(path);
+      return {
+        content: renderer(def, name),
+        skip: true,
+      };
+    });
+  }
 
   protected renderText(
     path: string,
     s: string,
     position: Position,
-    options: {
-      def: { showAlias: boolean; showBrackets: boolean };
-      ref: { showBrackets: boolean; html: boolean };
-    }
+    defRenderer: DefRenderer,
+    refRenderer: RefRenderer
   ) {
     let fragments: Fragment[] = [{ content: s, skip: false, position }];
 
-    fragments = this.renderDefinition(path, fragments, {
-      showAlias: options.def.showAlias,
-      showBrackets: options.def.showBrackets,
-    });
-    fragments = this.renderExplicitOrEscapedReference(path, fragments, {
-      showBrackets: options.ref.showBrackets,
-      html: options.ref.html,
-    });
+    fragments = this.renderDefinition(path, fragments, defRenderer);
+    fragments = this.renderExplicitOrEscapedReference(
+      path,
+      fragments,
+      refRenderer
+    );
 
     this.name2def.forEach((def, content) => {
-      fragments = this.renderImplicitReference(path, fragments, def, content, {
-        showBrackets: options.ref.showBrackets,
-        html: options.ref.html,
-      });
+      fragments = this.renderImplicitReference(
+        path,
+        fragments,
+        def,
+        content,
+        refRenderer
+      );
     });
 
     return fragments.map((f) => f.content).join("");
   }
-
-  /**
-   * Render a file based on the collected definitions.
-   */
-  abstract render(
-    path: string,
-    md: string,
-    options?: {
-      def?: { showAlias?: boolean; showBrackets?: boolean };
-      ref?: { showBrackets?: boolean; html?: boolean };
-    }
-  ): string;
 
   /**
    * Get the references of a definition.
