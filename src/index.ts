@@ -1,3 +1,4 @@
-export { BiMark } from "./bimark";
-export { BiParser } from "./parser";
+export * from "./bimark";
+export * from "./parser";
+export * from "./bidoc";
 export * from "./model";

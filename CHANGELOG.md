@@ -2,6 +2,7 @@
 
 ## v0.1.2
 
+- Add `BiDoc` class.
 - Add `Definition.fragment`.
 - Optimize code.
 
