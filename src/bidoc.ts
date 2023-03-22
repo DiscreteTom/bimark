@@ -31,28 +31,29 @@ export class BiDoc {
   }
 
   protected collectDefinition(text: string, path: string, position: Position) {
-    return BiParser.collectDefinition(
-      text,
-      path,
-      position,
-      this.defIdGenerator
-    ).defs.forEach((d) => {
-      // check name/alias/id duplication
-      if (this.name2def.has(d.name))
-        throw new Error(`Duplicate definition name: ${d.name} in file ${path}`);
-      if (this.id2def.has(d.id))
-        throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
-      d.alias.forEach((a) => {
-        if (this.name2def.has(a))
-          throw new Error(`Duplicate definition name: ${a} in file ${path}`);
-      });
+    return BiParser.collectDefinition(text, path, position).defs.forEach(
+      (d) => {
+        if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
 
-      this.name2def.set(d.name, d);
-      this.id2def.set(d.id, d);
-      d.alias.forEach((a) => {
-        this.name2def.set(a, d);
-      });
-    });
+        // check name/alias/id duplication
+        if (this.name2def.has(d.name))
+          throw new Error(
+            `Duplicate definition name: ${d.name} in file ${path}`
+          );
+        if (this.id2def.has(d.id))
+          throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
+        d.alias.forEach((a) => {
+          if (this.name2def.has(a))
+            throw new Error(`Duplicate definition name: ${a} in file ${path}`);
+        });
+
+        this.name2def.set(d.name, d);
+        this.id2def.set(d.id, d);
+        d.alias.forEach((a) => {
+          this.name2def.set(a, d);
+        });
+      }
+    );
   }
 
   private renderDefinition(
@@ -60,12 +61,9 @@ export class BiDoc {
     fragments: Fragment[],
     renderer: DefRenderer
   ) {
-    const res = BiParser.collectDefinitionFromFragments(
-      fragments,
-      path,
-      this.defIdGenerator
-    );
+    const res = BiParser.collectDefinitionFromFragments(fragments, path);
     res.defs.forEach((d) => {
+      if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
       d.fragment.content = renderer(d);
     });
 

@@ -82,24 +82,14 @@ export class BiParser {
     return result;
   }
 
-  static collectDefinition(
-    text: string,
-    path: string,
-    position: Position,
-    defIdGenerator: DefIdGenerator
-  ) {
+  static collectDefinition(text: string, path: string, position: Position) {
     return this.collectDefinitionFromFragments(
       this.initFragments(text, position),
-      path,
-      defIdGenerator
+      path
     );
   }
 
-  static collectDefinitionFromFragments(
-    fragments: Fragment[],
-    path: string,
-    defIdGenerator: DefIdGenerator
-  ) {
+  static collectDefinitionFromFragments(fragments: Fragment[], path: string) {
     const defs: (Pick<Definition, "name" | "alias" | "id"> & {
       index: number;
     })[] = [];
@@ -110,7 +100,7 @@ export class BiParser {
       (m, position, index) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : defIdGenerator(name);
+        const id = m[4] ? m[4].slice(1) : "";
         const partial = {
           content: m[0],
           skip: true,
