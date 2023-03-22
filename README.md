@@ -96,10 +96,39 @@ bm.render("file2.md", content2);
 bm.getReverseRefs({ name: "BiMark" }); // => ['file1.md#bimark-ref-1', 'file2.md#bimark-ref-2']
 ```
 
+### BiML
+
+You can also use `BiML` to parse and render HTML documents, the APIs are almost the same as `BiMark`.
+
+```ts
+import { BiML } from "bimark";
+
+// collect from and render a single file, return the rendered content
+BiML.singleFile("<p>[[BiML]]</p>");
+
+// collect definitions
+const bm = new BiML().collect("file1.html", content1);
+
+// render files
+bm.render("file1.html", content1);
+bm.render("file2.html", content2);
+
+// list reverse links
+bm.getReverseRefs({ name: "BiML" }); // => ['file1.html#biml-ref-1', 'file2.html#biml-ref-2']
+```
+
+### Extensibility
+
+BiMark provides low-level classes `BiDoc`/`BiParser` for you:
+
+- `BiDoc` is the base class of `BiMark`/`BiML`. You can extend this class to parse other file types.
+- `BiParser` is the low level parser to parse text string to `Fragment` for further processing.
+
 ## FAQ
 
 - Where can I make a definition/reference?
-  - Texts(e.g. headings, paragraphs, lists).
+  - For markdown, texts(e.g. headings, paragraphs, lists).
+  - For HTML, you can customize this by passing `selectors` options to `BiML.collect/render`.
 - How to solve the problem of duplicate ids?
   - You can use `[[name:id]]` to specify the id of a definition.
 - What characters are allowed in the name of a definition?
