@@ -1,6 +1,6 @@
 {
   "name": "bimark",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "out/index.js",
   "type": "module",
   "scripts": {
