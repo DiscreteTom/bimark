@@ -1,6 +1,6 @@
 import { remark } from "remark";
 import { visit } from "unist-util-visit";
-import { BiDoc } from "./bidoc";
+import { BiDoc } from "./bidoc.js";
 import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
 import { unified } from "unified";

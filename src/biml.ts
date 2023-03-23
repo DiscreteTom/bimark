@@ -1,7 +1,7 @@
 import { rehype } from "rehype";
 import { unified } from "unified";
 import rehypeStringify from "rehype-stringify";
-import { BiDoc } from "./bidoc";
+import { BiDoc } from "./bidoc.js";
 import { selectAll } from "hast-util-select";
 import { Element, Text } from "hast";
 

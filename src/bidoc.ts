@@ -8,7 +8,7 @@ import {
   DefRenderer,
   RefRenderer,
 } from "./model";
-import { BiParser } from "./parser";
+import { BiParser } from "./parser.js";
 
 export class BiDoc {
   /** name/alias => Definition */

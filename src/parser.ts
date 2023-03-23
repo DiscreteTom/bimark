@@ -4,7 +4,7 @@ import {
   FragmentProcessor,
   Position,
   shift,
-} from "./model";
+} from "./model.js";
 
 export class BiParser {
   static initFragments(text: string, position: Position): Fragment[] {

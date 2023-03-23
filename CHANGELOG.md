@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.3
+
+- Fix ESM module resolution.
+
 ## v0.1.2
 
 - Add `BiDoc`/`BiParser` class.
