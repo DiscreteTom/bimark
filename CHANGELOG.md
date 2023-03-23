@@ -2,7 +2,7 @@
 
 ## v0.1.2
 
-- Add `BiDoc` class.
+- Add `BiDoc`/`BiParser` class.
 - Add `out.html` option in `render` function.
 - Add `BiML` to parse & render HTML.
 - Optimize code.
