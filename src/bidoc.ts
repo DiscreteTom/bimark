@@ -7,7 +7,7 @@ import {
   Fragment,
   DefRenderer,
   RefRenderer,
-} from "./model";
+} from "./model.js";
 import { BiParser } from "./parser.js";
 
 export class BiDoc {

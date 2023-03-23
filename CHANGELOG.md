@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.4
+
+- Fix ESM module resolution.
+
 ## v0.1.3
 
 - Fix ESM module resolution.
