@@ -48,14 +48,34 @@ export class BiParser {
             skip: false,
             position: {
               start: f.position.start,
-              end: shift(f.position.start, before.slice(1)),
+              end: shift(
+                f.position.start,
+                before.slice(1) // skip the first char since it is counted in the start position
+              ),
             },
           });
         }
         // append process result
         const position = {
-          start: shift(f.position.start, before.slice(1)),
-          end: shift(f.position.start, (before + m[0]).slice(1)),
+          start:
+            before.length == 0
+              ? f.position.start
+              : shift(
+                  f.position.start,
+                  before.slice(1) + // skip the first char of before
+                    m[0][0] // count the first char of current match
+                ),
+          end:
+            before.length == 0
+              ? shift(
+                  f.position.start,
+                  m[0].slice(1) // skip the first char of current match
+                )
+              : shift(
+                  f.position.start,
+                  before.slice(1) + // skip the first char of before
+                    m[0]
+                ),
         };
         result.push({
           ...processor(m, position, result.length),
@@ -67,7 +87,10 @@ export class BiParser {
             content: after,
             skip: false,
             position: {
-              start: shift(f.position.start, (before + m[0]).slice(1)),
+              start: shift(
+                position.end, // use the end position of the current match
+                after[0] // count the first char of after
+              ),
               end: f.position.end,
             },
           });

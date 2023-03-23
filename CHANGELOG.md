@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.5
+
+- Fix definition position. Add more tests for this.
+
 ## v0.1.4
 
 - Fix ESM module resolution.

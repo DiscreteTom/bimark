@@ -38,6 +38,29 @@ test("complex collect", () => {
   expect(bm.name2def.get("BiMark")!).toBe(bm.name2def.get("bi-mark")!);
 });
 
+test("multiline collect", () => {
+  const bm = new BiMark().collect(
+    "file.md",
+    `# [[BiMark]]\n\nAuto create [[bidirectional links]] between markdown files.`
+  );
+  expect(bm.name2def.get("BiMark")!.fragment.position.start.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.fragment.position.start.column).toBe(3);
+  expect(bm.name2def.get("BiMark")!.fragment.position.end.line).toBe(1);
+  expect(bm.name2def.get("BiMark")!.fragment.position.end.column).toBe(12);
+  expect(
+    bm.name2def.get("bidirectional links")!.fragment.position.start.line
+  ).toBe(3);
+  expect(
+    bm.name2def.get("bidirectional links")!.fragment.position.start.column
+  ).toBe(13);
+  expect(
+    bm.name2def.get("bidirectional links")!.fragment.position.end.line
+  ).toBe(3);
+  expect(
+    bm.name2def.get("bidirectional links")!.fragment.position.end.column
+  ).toBe(35);
+});
+
 test("render", () => {
   const bm = new BiMark().collect("", `[[BiMark|bimark]]`);
   // def
