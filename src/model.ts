@@ -11,6 +11,11 @@ export interface Position {
   end: Point;
 }
 
+/**
+ * Shift the point by the offset.
+ * For example, if the point is at line 1, column 1, and the offset is "abc\ndef",
+ * the new point will be at line 2, column 3.
+ */
 export function shift(p: Point, offset: string) {
   const lines = offset.split("\n");
   return {
