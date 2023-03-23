@@ -6,7 +6,7 @@ node_modules
 CHANGELOG.md
 coverage
 docs
-tests
+test
 .vscode
 .prettierrc
 jest.config.js
