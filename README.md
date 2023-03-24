@@ -131,11 +131,12 @@ BiMark provides low-level classes `BiDoc`/`BiParser` for you:
   - For HTML, you can customize this by passing `selectors` options to `BiML.collect/render`.
 - How to solve the problem of duplicate ids?
   - You can use `[[name:id]]` to specify the id of a definition.
-- What characters are allowed in the name of a definition?
-  - Regex: `[ a-zA-Z0-9_-]`.
+- What characters are allowed in the name/alias of a definition?
+  - Regex: `` [^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r] ``.
   - Yes, spaces are allowed.
+  - Language specific characters are allowed, e.g. `[[中文]]` is allowed.
 - What characters are allowed in the id of a definition?
-  - Regex: `[a-zA-Z0-9_-]`.
+  - Regex: `` [^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r] ``.
   - No, spaces are not allowed.
 
 ## [CHANGELOG](https://github.com/DiscreteTom/bimark/blob/main/CHANGELOG.md)
