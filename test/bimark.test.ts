@@ -169,3 +169,30 @@ test("errors", () => {
     "Definition not found"
   );
 });
+
+test("i18n", () => {
+  const bm = new BiMark().collect("file.md", `# [[中文]]`);
+  expect(bm.name2def.size).toBe(1);
+  expect(bm.name2def.get("中文")!.name).toBe("中文");
+  expect(bm.name2def.get("中文")!.id).toBe("中文");
+  expect(bm.name2def.get("中文")!.alias.length).toBe(0);
+  expect(bm.name2def.get("中文")!.path).toBe("file.md");
+  expect(bm.name2def.get("中文")!.refs.length).toBe(0);
+  expect(bm.name2def.get("中文")!.fragment.position.start.line).toBe(1);
+  expect(bm.name2def.get("中文")!.fragment.position.start.column).toBe(3);
+  expect(bm.name2def.get("中文")!.fragment.position.end.line).toBe(1);
+  expect(bm.name2def.get("中文")!.fragment.position.end.column).toBe(8);
+  expect(bm.name2def.get("中文")!).toBe(bm.id2def.get("中文")!);
+
+  // render
+  expect(bm.render("file.md", "[[中文]]").trim()).toBe(
+    `<span id="中文">中文</span>`
+  );
+  expect(bm.render("file.md", "[[!中文]]").trim()).toBe(`中文`);
+  expect(bm.render("file.md", "[[#中文]]").trim()).toBe(
+    `[<span id="中文-ref-1">中文</span>](file.md#中文)`
+  );
+  expect(bm.render("file.md", "中文").trim()).toBe(
+    `[<span id="中文-ref-2">中文</span>](file.md#中文)`
+  );
+});
