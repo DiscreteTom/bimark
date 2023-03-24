@@ -5,6 +5,7 @@
 - Language specific characters are allowed in the name/alias/id of a definition.
   - Characters allowed in the name/alias of a definition: `` [^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r] ``.
   - Characters allowed in the id of a definition: `` [^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r] ``.
+- BiML will collect/render `li` elements by default.
 
 ## v0.1.5
 

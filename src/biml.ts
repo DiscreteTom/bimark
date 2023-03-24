@@ -37,6 +37,7 @@ export class BiML extends BiDoc {
       "h4",
       "h5",
       "h6",
+      "li",
     ];
 
     const targets = new Set<Text>(); // avoid processing the same text node twice
@@ -69,6 +70,7 @@ export class BiML extends BiDoc {
       "h4",
       "h5",
       "h6",
+      "li",
     ];
     const refSelectors = options?.ref?.selectors ?? defSelectors;
 
