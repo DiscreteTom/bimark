@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "yarn test && yarn build --build --clean && yarn build"
   },
   "repository": "git@github.com:DiscreteTom/bimark.git",
   "author": "DiscreteTom <discrete_tom@outlook.com>",
