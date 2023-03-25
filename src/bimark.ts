@@ -7,11 +7,15 @@ import { unified } from "unified";
 
 export type BiMarkRenderOptions = {
   def?: {
+    /** Show alias using `name|alias`. */
     showAlias?: boolean;
+    /** Show brackets using `[[name|alias]]`. */
     showBrackets?: boolean;
   };
   ref?: {
+    /** Show brackets using `[[name]]`. */
     showBrackets?: boolean;
+    /** Render link as HTML `<a>` instead of markdown inline link. */
     html?: boolean;
   };
   output?: {

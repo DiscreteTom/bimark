@@ -7,12 +7,23 @@ import { Element, Text } from "hast";
 
 export type BiMLRenderOptions = {
   def?: {
+    /**
+     * Query selectors for HTML to select elements to render definitions.
+     * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
+     */
     selectors?: string[];
+    /** Show alias using `name|alias`. */
     showAlias?: boolean;
+    /** Show brackets using `[[name|alias]]`. */
     showBrackets?: boolean;
   };
   ref?: {
+    /**
+     * Query selectors for HTML to select elements to render references.
+     * Default: the same as `options.def.selectors`
+     */
     selectors?: string[];
+    /** Show brackets using `[[name]]`. */
     showBrackets?: boolean;
   };
 };
@@ -27,7 +38,17 @@ export class BiML extends BiDoc {
   /**
    * Collect definitions from an html document.
    */
-  collect(path: string, content: string, options?: { selectors?: string[] }) {
+  collect(
+    path: string,
+    content: string,
+    options?: {
+      /**
+       * Query selectors for HTML to select elements to collect definitions.
+       * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
+       */
+      selectors?: string[];
+    }
+  ) {
     const selectors = options?.selectors ?? [
       "p",
       "span",
