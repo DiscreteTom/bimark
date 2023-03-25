@@ -31,7 +31,10 @@ export class BiDoc {
     this.id2def = new Map();
   }
 
-  protected collectDefinition(text: string, path: string, position: Position) {
+  /**
+   * Parse definitions from the text, and store them in `this.name2def` and `this.id2def`.
+   * Throw error if there are duplicate definitions.
+   */
     return BiParser.parseDefinition(text, path, position).defs.forEach((d) => {
       if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
 
@@ -128,6 +131,10 @@ export class BiDoc {
     return res.fragments;
   }
 
+  /**
+   * Parse the text, and render the definitions and references.
+   * This will also collect refs in `this.name2def` and `this.id2def`.
+   */
   protected renderText(
     path: string,
     s: string,
