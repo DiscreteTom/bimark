@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.2.0
+
+- Add interface `Reference`.
+- **Breaking Change**: `Definition.refs` will be `Reference[]` instead of `string[]`.
+- **Breaking Change**: `RefIdGenerator` is `(ref: Reference, def: Definition) => string`.
+- **Breaking Change**: `RefRenderer` is `(ref: Reference, def: Definition) => string`.
+- Fix: escaped reference for alias will be rendered as the alias instead of the name.
+
 ## v0.1.6
 
 - Language specific characters are allowed in the name/alias/id of a definition.
