@@ -1,4 +1,5 @@
 import {
+  DefIdGenerator,
   Definition,
   Fragment,
   FragmentProcessor,
@@ -107,7 +108,8 @@ export class BiParser {
 
   static parseDefinitions(
     fragments: readonly Readonly<Fragment>[],
-    path: string
+    path: string,
+    defIdGenerator: DefIdGenerator
   ) {
     const defs: (Pick<Definition, "name" | "alias" | "id"> & {
       index: number;
@@ -120,7 +122,7 @@ export class BiParser {
       (m, position, index) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : "";
+        const id = m[4] ? m[4].slice(1) : defIdGenerator(name);
         const partial = {
           content: m[0],
           skip: true,

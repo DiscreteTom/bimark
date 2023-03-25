@@ -42,7 +42,8 @@ export class BiDoc {
   ) {
     const res = BiParser.parseDefinitions(
       BiParser.initFragments(text, position),
-      path
+      path,
+      this.defIdGenerator
     );
 
     res.defs.forEach((d) => {
@@ -79,7 +80,8 @@ export class BiDoc {
     // ignore definitions before parsing references
     const { fragments } = BiParser.parseDefinitions(
       BiParser.initFragments(text, position),
-      path
+      path,
+      this.defIdGenerator
     );
 
     return this.collectReferencesFromFragments(fragments, path);
@@ -129,7 +131,8 @@ export class BiDoc {
   ) {
     const res = BiParser.parseDefinitions(
       BiParser.initFragments(text, position),
-      path
+      path,
+      this.defIdGenerator
     );
     res.defs.forEach((def) => (def.fragment.content = defRenderer(def)));
     const res2 = this.collectReferencesFromFragments(res.fragments, path);
