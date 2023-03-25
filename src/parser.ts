@@ -104,18 +104,18 @@ export class BiParser {
     return result;
   }
 
-  static collectDefinition(
+  static parseDefinition(
     text: string,
     path: string,
     position: Readonly<Position>
   ) {
-    return this.collectDefinitionFromFragments(
+    return this.parseDefinitionFromFragments(
       this.initFragments(text, position),
       path
     );
   }
 
-  static collectDefinitionFromFragments(
+  static parseDefinitionFromFragments(
     fragments: readonly Readonly<Fragment>[],
     path: string
   ) {
@@ -155,10 +155,10 @@ export class BiParser {
   }
 
   /**
-   * Only **collect** explicit or escaped references.
+   * Only **parse** explicit or escaped references.
    * This won't change existing references in the definition.
    */
-  static collectExplicitOrEscapedReference(
+  static parseExplicitOrEscapedReference(
     fragments: readonly Readonly<Fragment>[],
     path: string,
     name2def: ReadonlyMap<string, Definition>,
@@ -208,10 +208,10 @@ export class BiParser {
   }
 
   /**
-   * Only **collect** implicit references.
+   * Only **parse** implicit references.
    * This won't change existing references in the definition.
    */
-  static collectImplicitReference(
+  static parseImplicitReference(
     fragments: readonly Readonly<Fragment>[],
     /** name or alias */
     name: string
