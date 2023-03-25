@@ -25,9 +25,11 @@ export function shift(p: Point, offset: string) {
 }
 
 export interface Reference {
+  /** The file path of the reference. */
   path: string;
   fragment: Fragment;
   type: "escaped" | "implicit" | "explicit";
+  /** Only implicit/explicit reference has a unique index. */
   index: number;
   /** name or alias */
   name: string;
@@ -36,6 +38,7 @@ export interface Reference {
 export interface Definition {
   name: string;
   alias: string[];
+  /** The file path of the definition */
   path: string;
   id: string;
   refs: Reference[];
@@ -44,6 +47,7 @@ export interface Definition {
 
 export type Fragment = {
   content: string;
+  /** If this fragment is a definition/reference, skip. */
   skip: boolean;
   /** Position in the original file. */
   position: Position;
