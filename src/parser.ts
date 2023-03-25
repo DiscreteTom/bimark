@@ -7,12 +7,12 @@ import {
 } from "./model.js";
 
 export class BiParser {
-  static initFragments(text: string, position: Position): Fragment[] {
+  static initFragments(text: string, position: Readonly<Position>): Fragment[] {
     return [{ content: text, skip: false, position }];
   }
 
   static processFragments(
-    fragments: Fragment[],
+    fragments: readonly Readonly<Fragment>[],
     regex: RegExp,
     processor: FragmentProcessor
   ) {
@@ -104,19 +104,26 @@ export class BiParser {
     return result;
   }
 
-  static collectDefinition(text: string, path: string, position: Position) {
+  static collectDefinition(
+    text: string,
+    path: string,
+    position: Readonly<Position>
+  ) {
     return this.collectDefinitionFromFragments(
       this.initFragments(text, position),
       path
     );
   }
 
-  static collectDefinitionFromFragments(fragments: Fragment[], path: string) {
+  static collectDefinitionFromFragments(
+    fragments: readonly Readonly<Fragment>[],
+    path: string
+  ) {
     const defs: (Pick<Definition, "name" | "alias" | "id"> & {
       index: number;
     })[] = [];
 
-    fragments = this.processFragments(
+    const resultFragments = this.processFragments(
       fragments,
       // [[name|alias|alias|...|alias:id]]
       /\[\[([^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+)((\|[^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+)*)(:[^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r]+)?\]\]/g,
@@ -134,21 +141,21 @@ export class BiParser {
     );
 
     return {
-      fragments,
+      fragments: resultFragments,
       defs: defs.map(
         (d) =>
           ({
             ...d,
             path,
             refs: [],
-            fragment: fragments[d.index],
+            fragment: resultFragments[d.index],
           } as Definition)
       ),
     };
   }
 
   static collectExplicitOrEscapedReference(
-    fragments: Fragment[],
+    fragments: readonly Readonly<Fragment>[],
     path: string,
     name2def: ReadonlyMap<string, Definition>,
     id2def: ReadonlyMap<string, Definition>
@@ -159,7 +166,7 @@ export class BiParser {
       def: Definition;
     }[] = [];
 
-    fragments = this.processFragments(
+    const resultFragments = this.processFragments(
       fragments,
       // [[#id]] or [[!name]]
       /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+))\]\]/g,
@@ -181,12 +188,12 @@ export class BiParser {
     );
 
     return {
-      fragments,
+      fragments: resultFragments,
       refs: refs.map(
         (r) =>
           ({
             ...r,
-            fragment: fragments[r.index],
+            fragment: resultFragments[r.index],
           } as {
             type: "explicit" | "escaped";
             def: Definition;
@@ -197,13 +204,13 @@ export class BiParser {
   }
 
   static collectImplicitReference(
-    fragments: Fragment[],
+    fragments: readonly Readonly<Fragment>[],
     /** name or alias */
     name: string
   ) {
     const refs: number[] = [];
 
-    fragments = BiParser.processFragments(
+    const resultFragments = BiParser.processFragments(
       fragments,
       new RegExp(name, "g"),
       (m, position, index) => {
@@ -216,8 +223,8 @@ export class BiParser {
     );
 
     return {
-      fragments,
-      refs: refs.map((i) => fragments[i]),
+      fragments: resultFragments,
+      refs: refs.map((i) => resultFragments[i]),
     };
   }
 }
