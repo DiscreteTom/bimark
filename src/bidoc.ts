@@ -93,6 +93,7 @@ export class BiDoc {
     );
     res.refs.forEach((r) => {
       const ref: Reference = {
+        def: r.def,
         path,
         fragment: r.fragment,
         type: r.type,
@@ -128,6 +129,7 @@ export class BiDoc {
     const res = BiParser.parseImplicitReference(fragments, name);
     res.refs.forEach((r) => {
       const ref: Reference = {
+        def,
         path,
         fragment: r,
         type: "implicit" as const,

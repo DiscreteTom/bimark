@@ -41,6 +41,7 @@ export interface Reference {
   index: number;
   /** name or alias */
   name: string;
+  def: Definition;
 }
 
 export interface Definition {
