@@ -3,6 +3,7 @@ import {
   Fragment,
   FragmentProcessor,
   Position,
+  Reference,
   shift,
 } from "./model.js";
 
@@ -104,18 +105,7 @@ export class BiParser {
     return result;
   }
 
-  static parseDefinition(
-    text: string,
-    path: string,
-    position: Readonly<Position>
-  ) {
-    return this.parseDefinitionFromFragments(
-      this.initFragments(text, position),
-      path
-    );
-  }
-
-  static parseDefinitionFromFragments(
+  static parseDefinitions(
     fragments: readonly Readonly<Fragment>[],
     path: string
   ) {
@@ -156,25 +146,24 @@ export class BiParser {
 
   /**
    * Only **parse** explicit or escaped references.
-   * This won't change existing references in the definition.
+   * This won't change existing references in the definition, so you may want to add them manually.
    */
-  static parseExplicitOrEscapedReference(
+  static parseExplicitOrEscapedReferences(
     fragments: readonly Readonly<Fragment>[],
     path: string,
     name2def: ReadonlyMap<string, Definition>,
     id2def: ReadonlyMap<string, Definition>
   ) {
-    const refs: {
-      type: "explicit" | "escaped";
-      index: number;
-      def: Definition;
-    }[] = [];
+    const refs: (Omit<Reference, "fragment" | "index"> & {
+      /** index of fragment */
+      fi: number;
+    })[] = [];
 
     const resultFragments = this.processFragments(
       fragments,
       // [[#id]] or [[!name]]
       /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+))\]\]/g,
-      (m, position, index) => {
+      (m, position, fi) => {
         const type = m[1].startsWith("#") ? "explicit" : "escaped";
         const def =
           type == "explicit"
@@ -182,7 +171,16 @@ export class BiParser {
             : name2def.get(m[1].slice(1));
         if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
 
-        refs.push({ type, def, index });
+        refs.push({
+          fi,
+          type,
+          def,
+          path,
+          name:
+            type == "escaped"
+              ? m[1].slice(1) // remove the first char "!"
+              : def.name, // explicit, use the name of the definition
+        });
 
         return {
           content: m[0],
@@ -193,36 +191,35 @@ export class BiParser {
 
     return {
       fragments: resultFragments,
-      refs: refs.map(
-        (r) =>
-          ({
-            ...r,
-            fragment: resultFragments[r.index],
-          } as {
-            type: "explicit" | "escaped";
-            def: Definition;
-            fragment: Fragment;
-          })
-      ),
+      refs: refs.map((r) => ({
+        ...r,
+        fragment: resultFragments[r.fi],
+      })) as Omit<Reference, "index">[],
     };
   }
 
   /**
    * Only **parse** implicit references.
-   * This won't change existing references in the definition.
+   * This won't change existing references in the definition, so you may want to add them manually.
+   * This should be called after `parseDefinition` and `parseExplicitOrEscapedReference` to avoid conflicts.
    */
-  static parseImplicitReference(
+  static parseImplicitReferences(
     fragments: readonly Readonly<Fragment>[],
     /** name or alias */
-    name: string
+    name: string,
+    def: Definition,
+    path: string
   ) {
-    const refs: number[] = [];
+    const refs: (Omit<Reference, "index" | "fragment"> & {
+      /** index of fragment */
+      fi: number;
+    })[] = [];
 
     const resultFragments = BiParser.processFragments(
       fragments,
       new RegExp(name, "g"),
-      (m, position, index) => {
-        refs.push(index);
+      (m, position, fi) => {
+        refs.push({ fi, path, type: "implicit", def, name });
         return {
           content: m[0],
           skip: true,
@@ -232,7 +229,64 @@ export class BiParser {
 
     return {
       fragments: resultFragments,
-      refs: refs.map((i) => resultFragments[i]),
+      refs: refs.map((r) => ({
+        ...r,
+        fragment: resultFragments[r.fi],
+      })) as Omit<Reference, "index">[],
     };
+  }
+
+  /**
+   * Only **parse** implicit references.
+   * This won't change existing references in the definition, so you may want to add them manually.
+   * This should be called after `parseDefinition` and `parseExplicitOrEscapedReference` to avoid conflicts.
+   */
+  static parseAllImplicitReferences(
+    fragments: readonly Readonly<Fragment>[],
+    path: string,
+    name2def: ReadonlyMap<string, Definition>
+  ) {
+    const result = {
+      fragments: fragments as Fragment[],
+      refs: [] as Omit<Reference, "index">[],
+    };
+    name2def.forEach((def, name) => {
+      const res = this.parseImplicitReferences(
+        result.fragments,
+        name,
+        def,
+        path
+      );
+      result.fragments = res.fragments;
+      result.refs.push(...res.refs);
+    });
+    return result;
+  }
+
+  /**
+   * Only **parse** implicit references.
+   * This won't change existing references in the definition, so you may want to add them manually.
+   * This should be called after `parseDefinition` to avoid conflicts.
+   */
+  static parseAllReferences(
+    fragments: readonly Readonly<Fragment>[],
+    path: string,
+    name2def: ReadonlyMap<string, Definition>,
+    id2def: ReadonlyMap<string, Definition>
+  ) {
+    const result = this.parseExplicitOrEscapedReferences(
+      fragments,
+      path,
+      name2def,
+      id2def
+    );
+    const res = this.parseAllImplicitReferences(
+      result.fragments,
+      path,
+      name2def
+    );
+    result.fragments = res.fragments;
+    result.refs.push(...res.refs);
+    return result;
   }
 }

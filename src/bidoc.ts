@@ -35,12 +35,15 @@ export class BiDoc {
    * Parse definitions from the text, and store them in `this.name2def` and `this.id2def`.
    * Throw error if there are duplicate definitions.
    */
-  protected collectDefinition(
+  protected collectDefinitions(
     text: string,
     path: string,
     position: Readonly<Position>
   ) {
-    const res = BiParser.parseDefinition(text, path, position);
+    const res = BiParser.parseDefinitions(
+      BiParser.initFragments(text, position),
+      path
+    );
 
     res.defs.forEach((d) => {
       if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
@@ -64,83 +67,53 @@ export class BiDoc {
 
     return res;
   }
+
+  /**
+   * Parse references from the text, and store them in `this.name2def` and `this.id2def`.
+   */
+  protected collectReferences(
+    path: string,
+    text: string,
+    position: Readonly<Position>
+  ) {
+    // ignore definitions before parsing references
+    const { fragments } = BiParser.parseDefinitions(
+      BiParser.initFragments(text, position),
+      path
+    );
+
+    return this.collectReferencesFromFragments(fragments, path);
   }
 
-  private renderDefinition(
-    path: string,
+  /**
+   * Parse references from the fragments, and store them in `this.name2def` and `this.id2def`.
+   * The fragments should not contain any definitions.
+   */
+  protected collectReferencesFromFragments(
     fragments: readonly Readonly<Fragment>[],
-    renderer: DefRenderer
+    path: string
   ) {
-    const res = BiParser.parseDefinitionFromFragments(fragments, path);
-    res.defs.forEach((d) => {
-      if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
-      d.fragment.content = renderer(d);
-    });
-
-    return res.fragments;
-  }
-
-  private renderExplicitOrEscapedReference(
-    path: string,
-    fragments: readonly Readonly<Fragment>[],
-    renderer: RefRenderer
-  ) {
-    const res = BiParser.parseExplicitOrEscapedReference(
+    const res = BiParser.parseAllReferences(
       fragments,
       path,
       this.name2def,
       this.id2def
     );
-    res.refs.forEach((r) => {
+
+    // assign index to references and store them in `this.name2def` and `this.id2def`
+    const refs = res.refs.map((r) => {
       const ref: Reference = {
-        def: r.def,
-        path,
-        fragment: r.fragment,
-        type: r.type,
+        ...r,
         index:
           r.type == "escaped"
             ? r.def.refs.at(-1)?.index ?? -1 // escaped reference always has the same index as the last reference since they won't be rendered
             : (r.def.refs.at(-1)?.index ?? -1) + 1,
-        name:
-          r.type == "escaped"
-            ? r.fragment.content.slice(3, -2) // remove `[[#` and `]]`
-            : this.id2def.get(r.fragment.content.slice(3, -2))!.name,
       };
       r.def.refs.push(ref);
-      if (r.type == "explicit") {
-        r.fragment.content = renderer(ref);
-      } else {
-        // escaped, just show the name
-        r.fragment.content = ref.name;
-      }
+      return ref;
     });
 
-    return res.fragments;
-  }
-
-  private renderImplicitReference(
-    path: string,
-    fragments: readonly Readonly<Fragment>[],
-    def: Readonly<Definition>,
-    /** name or alias */
-    name: string,
-    renderer: RefRenderer
-  ) {
-    const res = BiParser.parseImplicitReference(fragments, name);
-    res.refs.forEach((r) => {
-      const ref: Reference = {
-        def,
-        path,
-        fragment: r,
-        type: "implicit" as const,
-        index: (def.refs.at(-1)?.index ?? -1) + 1,
-        name: r.content,
-      };
-      def.refs.push(ref);
-      r.content = renderer(ref);
-    });
-
-    return res.fragments;
+    return { fragments: res.fragments, refs };
   }
 
   /**
@@ -149,31 +122,20 @@ export class BiDoc {
    */
   protected renderText(
     path: string,
-    s: string,
+    text: string,
     position: Readonly<Position>,
     defRenderer: DefRenderer,
     refRenderer: RefRenderer
   ) {
-    let fragments: Fragment[] = [{ content: s, skip: false, position }];
-
-    fragments = this.renderDefinition(path, fragments, defRenderer);
-    fragments = this.renderExplicitOrEscapedReference(
-      path,
-      fragments,
-      refRenderer
+    const res = BiParser.parseDefinitions(
+      BiParser.initFragments(text, position),
+      path
     );
+    res.defs.forEach((def) => (def.fragment.content = defRenderer(def)));
+    const res2 = this.collectReferencesFromFragments(res.fragments, path);
+    res2.refs.forEach((ref) => (ref.fragment.content = refRenderer(ref)));
 
-    this.name2def.forEach((def, content) => {
-      fragments = this.renderImplicitReference(
-        path,
-        fragments,
-        def,
-        content,
-        refRenderer
-      );
-    });
-
-    return fragments.map((f) => f.content).join("");
+    return res2.fragments.map((f) => f.content).join("");
   }
 
   /**

@@ -35,7 +35,7 @@ export type Fragment = {
 export interface Reference {
   /** The file path of the reference. */
   path: string;
-  fragment: Readonly<Fragment>;
+  fragment: Fragment;
   type: "escaped" | "implicit" | "explicit";
   /** Only implicit/explicit reference has a unique index. */
   index: number;

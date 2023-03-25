@@ -37,7 +37,7 @@ export class BiMark extends BiDoc {
     const ast = remark.parse(content);
     visit(ast, (node) => {
       if (node.type == "text")
-        this.collectDefinition(node.value, path, node.position!);
+        this.collectDefinitions(node.value, path, node.position!);
     });
     return this;
   }

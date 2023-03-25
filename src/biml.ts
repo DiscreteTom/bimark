@@ -74,7 +74,7 @@ export class BiML extends BiDoc {
       });
     });
 
-    targets.forEach((c) => this.collectDefinition(c.value, path, c.position!));
+    targets.forEach((c) => this.collectDefinitions(c.value, path, c.position!));
     return this;
   }
 
