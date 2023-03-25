@@ -136,7 +136,11 @@ export class BiDoc {
     );
     res.defs.forEach((def) => (def.fragment.content = defRenderer(def)));
     const res2 = this.collectReferencesFromFragments(res.fragments, path);
-    res2.refs.forEach((ref) => (ref.fragment.content = refRenderer(ref)));
+    res2.refs.forEach(
+      (ref) =>
+        (ref.fragment.content =
+          ref.type == "escaped" ? ref.name : refRenderer(ref))
+    );
 
     return res2.fragments.map((f) => f.content).join("");
   }
@@ -157,5 +161,31 @@ export class BiDoc {
     return def.refs.map((ref) => `${ref.path}#${this.refIdGenerator(ref)}`);
   }
 
+  /**
+   * Remove all definitions and references from the document.
+   */
+  purge(path: string) {
+    // first, remove existing defs in the document
+    const ids: string[] = [];
+    const names: string[] = [];
+    this.id2def.forEach((def) => {
+      if (def.path == path) {
+        ids.push(def.id);
+        names.push(def.name);
+        names.push(...def.alias);
+      }
+    });
+    ids.forEach((id) => this.id2def.delete(id));
+    names.forEach((name) => this.name2def.delete(name));
+
+    // then, remove existing ref in the document
+    this.id2def.forEach((def) => {
+      def.refs = def.refs.filter((ref) => ref.path != path);
+    });
+    this.name2def.forEach((def) => {
+      def.refs = def.refs.filter((ref) => ref.path != path);
+    });
+
+    return this;
   }
 }
