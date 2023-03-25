@@ -35,6 +35,11 @@ export class BiDoc {
    * Parse definitions from the text, and store them in `this.name2def` and `this.id2def`.
    * Throw error if there are duplicate definitions.
    */
+  protected collectDefinition(
+    text: string,
+    path: string,
+    position: Readonly<Position>
+  ) {
     return BiParser.parseDefinition(text, path, position).defs.forEach((d) => {
       if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
 
@@ -58,7 +63,7 @@ export class BiDoc {
 
   private renderDefinition(
     path: string,
-    fragments: Fragment[],
+    fragments: readonly Readonly<Fragment>[],
     renderer: DefRenderer
   ) {
     const res = BiParser.parseDefinitionFromFragments(fragments, path);
@@ -72,7 +77,7 @@ export class BiDoc {
 
   private renderExplicitOrEscapedReference(
     path: string,
-    fragments: Fragment[],
+    fragments: readonly Readonly<Fragment>[],
     renderer: RefRenderer
   ) {
     const res = BiParser.parseExplicitOrEscapedReference(
@@ -109,8 +114,8 @@ export class BiDoc {
 
   private renderImplicitReference(
     path: string,
-    fragments: Fragment[],
-    def: Definition,
+    fragments: readonly Readonly<Fragment>[],
+    def: Readonly<Definition>,
     /** name or alias */
     name: string,
     renderer: RefRenderer
@@ -138,7 +143,7 @@ export class BiDoc {
   protected renderText(
     path: string,
     s: string,
-    position: Position,
+    position: Readonly<Position>,
     defRenderer: DefRenderer,
     refRenderer: RefRenderer
   ) {
