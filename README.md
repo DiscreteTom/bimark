@@ -7,13 +7,16 @@ Auto create [[bidirectional links]] between markdown files.
 
 ## Installation
 
-```bash
-# for API usage
-npm install bimark
+For API usage:
 
-# for CLI usage, see https://github.com/DiscreteTom/bimark-cli
-npm install -g bimark-cli
+```bash
+npm install bimark
 ```
+
+Other usages:
+
+- CLI, see [bimark-cli](https://github.com/DiscreteTom/bimark-cli).
+- VSCode extension, see [vscode-bimark](https://github.com/DiscreteTom/vscode-bimark).
 
 ## Usage
 
