@@ -5,12 +5,6 @@ export interface Point {
   column: number;
 }
 
-export interface Position {
-  start: Point;
-  /** End is included. */
-  end: Point;
-}
-
 /**
  * Shift the point by the offset.
  * For example, if the point is at line 1, column 1, and the offset is "abc\ndef",
@@ -24,10 +18,24 @@ export function shift(p: Readonly<Point>, offset: string) {
   };
 }
 
+export interface Position {
+  start: Readonly<Point>;
+  /** End is included. */
+  end: Readonly<Point>;
+}
+
+export type Fragment = {
+  content: string;
+  /** If this fragment is a definition/reference, skip. */
+  skip: boolean;
+  /** Position in the original file. */
+  position: Readonly<Position>;
+};
+
 export interface Reference {
   /** The file path of the reference. */
   path: string;
-  fragment: Fragment;
+  fragment: Readonly<Fragment>;
   type: "escaped" | "implicit" | "explicit";
   /** Only implicit/explicit reference has a unique index. */
   index: number;
@@ -41,21 +49,13 @@ export interface Definition {
   /** The file path of the definition */
   path: string;
   id: string;
-  refs: Reference[];
+  refs: Readonly<Reference>[];
   fragment: Fragment;
 }
 
-export type Fragment = {
-  content: string;
-  /** If this fragment is a definition/reference, skip. */
-  skip: boolean;
-  /** Position in the original file. */
-  position: Position;
-};
-
 export type FragmentProcessor = (
   m: RegExpMatchArray,
-  position: Position,
+  position: Readonly<Position>,
   index: number
 ) => Pick<Fragment, "content" | "skip">;
 
