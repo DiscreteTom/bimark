@@ -16,7 +16,7 @@ export interface Position {
  * For example, if the point is at line 1, column 1, and the offset is "abc\ndef",
  * the new point will be at line 2, column 3.
  */
-export function shift(p: Point, offset: string) {
+export function shift(p: Readonly<Point>, offset: string) {
   const lines = offset.split("\n");
   return {
     line: p.line + lines.length - 1,
@@ -60,7 +60,13 @@ export type FragmentProcessor = (
 ) => Pick<Fragment, "content" | "skip">;
 
 export type DefIdGenerator = (name: string) => string;
-export type RefIdGenerator = (ref: Reference, def: Definition) => string;
+export type RefIdGenerator = (
+  ref: Readonly<Reference>,
+  def: Readonly<Definition>
+) => string;
 
-export type DefRenderer = (def: Definition) => string;
-export type RefRenderer = (ref: Reference, def: Definition) => string;
+export type DefRenderer = (def: Readonly<Definition>) => string;
+export type RefRenderer = (
+  ref: Readonly<Reference>,
+  def: Readonly<Definition>
+) => string;
