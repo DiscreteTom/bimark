@@ -40,7 +40,9 @@ export class BiDoc {
     path: string,
     position: Readonly<Position>
   ) {
-    return BiParser.parseDefinition(text, path, position).defs.forEach((d) => {
+    const res = BiParser.parseDefinition(text, path, position);
+
+    res.defs.forEach((d) => {
       if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
 
       // check name/alias/id duplication
@@ -59,6 +61,9 @@ export class BiDoc {
         this.name2def.set(a, d);
       });
     });
+
+    return res;
+  }
   }
 
   private renderDefinition(
