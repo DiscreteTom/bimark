@@ -118,7 +118,7 @@ export class BiParser {
     const resultFragments = this.processFragments(
       fragments,
       // [[name|alias|alias|...|alias:id]]
-      /\[\[([^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+)((\|[^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+)*)(:[^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r]+)?\]\]/g,
+      /\[\[([^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+)((\|[^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+)*)(:[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)?\]\]/g,
       (m, position, index) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
@@ -164,7 +164,7 @@ export class BiParser {
     const resultFragments = this.processFragments(
       fragments,
       // [[#id]] or [[!name]]
-      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~[\]`\n\r]+))\]\]/g,
+      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+))\]\]/g,
       (m, position, fi) => {
         const type = m[1].startsWith("#") ? "explicit" : "escaped";
         const def =
