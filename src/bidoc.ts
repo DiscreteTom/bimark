@@ -7,6 +7,7 @@ import {
   Fragment,
   DefRenderer,
   RefRenderer,
+  Reference,
 } from "./model.js";
 import { BiParser } from "./parser.js";
 
@@ -24,7 +25,7 @@ export class BiDoc {
     this.defIdGenerator = options?.defIdGenerator ?? ((name) => uslug(name));
     this.refIdGenerator =
       options?.refIdGenerator ??
-      ((_, def, index) => `${def.id}-ref-${index + 1}`);
+      ((ref, def) => `${def.id}-ref-${ref.index + 1}`);
 
     this.name2def = new Map();
     this.id2def = new Map();
@@ -82,12 +83,25 @@ export class BiDoc {
       this.id2def
     );
     res.refs.forEach((r) => {
+      const ref: Reference = {
+        path,
+        fragment: r.fragment,
+        type: r.type,
+        index:
+          r.type == "escaped"
+            ? r.def.refs.at(-1)?.index ?? -1 // escaped reference always has the same index as the last reference since they won't be rendered
+            : (r.def.refs.at(-1)?.index ?? -1) + 1,
+        name:
+          r.type == "escaped"
+            ? r.fragment.content.slice(3, -2) // remove `[[#` and `]]`
+            : this.id2def.get(r.fragment.content.slice(3, -2))!.name,
+      };
+      r.def.refs.push(ref);
       if (r.type == "explicit") {
-        r.def.refs.push(path);
-        r.fragment.content = renderer(r.def, r.def.name);
+        r.fragment.content = renderer(ref, r.def);
       } else {
         // escaped, just show the name
-        r.fragment.content = r.def.name;
+        r.fragment.content = ref.name;
       }
     });
 
@@ -104,8 +118,15 @@ export class BiDoc {
   ) {
     const res = BiParser.collectImplicitReference(fragments, name);
     res.refs.forEach((r) => {
-      def.refs.push(path);
-      r.content = renderer(def, name);
+      const ref: Reference = {
+        path,
+        fragment: r,
+        type: "implicit" as const,
+        index: (def.refs.at(-1)?.index ?? -1) + 1,
+        name: r.content,
+      };
+      def.refs.push(ref);
+      r.content = renderer(ref, def);
     });
 
     return res.fragments;
@@ -153,6 +174,8 @@ export class BiDoc {
     if (!def)
       throw new Error(`Definition not found: ${JSON.stringify(options)}`);
 
-    return def.refs.map((p, i) => `${p}#${this.refIdGenerator(p, def, i)}`);
+    return def.refs.map(
+      (ref) => `${ref.path}#${this.refIdGenerator(ref, def)}`
+    );
   }
 }

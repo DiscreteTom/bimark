@@ -81,6 +81,8 @@ test("render", () => {
   expect(bm.render("", "bimark").trim()).toBe(
     '[<span id="bimark-ref-3">bimark</span>](#bimark)'
   );
+  // escaped alias
+  expect(bm.render("", "[[!bimark]]").trim()).toBe("bimark");
 });
 
 test("complex render with options", () => {

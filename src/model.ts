@@ -24,13 +24,21 @@ export function shift(p: Point, offset: string) {
   };
 }
 
+export interface Reference {
+  path: string;
+  fragment: Fragment;
+  type: "escaped" | "implicit" | "explicit";
+  index: number;
+  /** name or alias */
+  name: string;
+}
+
 export interface Definition {
   name: string;
   alias: string[];
   path: string;
   id: string;
-  /** Path list. */
-  refs: string[];
+  refs: Reference[];
   fragment: Fragment;
 }
 
@@ -48,11 +56,7 @@ export type FragmentProcessor = (
 ) => Pick<Fragment, "content" | "skip">;
 
 export type DefIdGenerator = (name: string) => string;
-export type RefIdGenerator = (
-  path: string,
-  def: Definition,
-  index: number
-) => string;
+export type RefIdGenerator = (ref: Reference, def: Definition) => string;
 
 export type DefRenderer = (def: Definition) => string;
-export type RefRenderer = (def: Definition, name: string) => string;
+export type RefRenderer = (ref: Reference, def: Definition) => string;
