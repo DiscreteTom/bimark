@@ -154,6 +154,10 @@ export class BiParser {
     };
   }
 
+  /**
+   * Only **collect** explicit or escaped references.
+   * This won't change existing references in the definition.
+   */
   static collectExplicitOrEscapedReference(
     fragments: readonly Readonly<Fragment>[],
     path: string,
@@ -203,6 +207,10 @@ export class BiParser {
     };
   }
 
+  /**
+   * Only **collect** implicit references.
+   * This won't change existing references in the definition.
+   */
   static collectImplicitReference(
     fragments: readonly Readonly<Fragment>[],
     /** name or alias */
