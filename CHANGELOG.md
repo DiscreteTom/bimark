@@ -3,6 +3,7 @@
 ## v0.2.0
 
 - Add interface `Reference`.
+- Add `BiDoc.purge`.
 - **Breaking Change**: `Definition.refs` will be `Reference[]` instead of `string[]`.
 - **Breaking Change**: `RefIdGenerator` is `(ref: Reference) => string`.
 - **Breaking Change**: `RefRenderer` is `(ref: Reference) => string`.
