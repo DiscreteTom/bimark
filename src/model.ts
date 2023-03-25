@@ -61,13 +61,7 @@ export type FragmentProcessor = (
 ) => Pick<Fragment, "content" | "skip">;
 
 export type DefIdGenerator = (name: string) => string;
-export type RefIdGenerator = (
-  ref: Readonly<Reference>,
-  def: Readonly<Definition>
-) => string;
+export type RefIdGenerator = (ref: Readonly<Reference>) => string;
 
 export type DefRenderer = (def: Readonly<Definition>) => string;
-export type RefRenderer = (
-  ref: Readonly<Reference>,
-  def: Readonly<Definition>
-) => string;
+export type RefRenderer = (ref: Readonly<Reference>) => string;

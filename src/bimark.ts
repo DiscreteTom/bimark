@@ -69,15 +69,15 @@ export class BiMark extends BiDoc {
                     (options?.def?.showBrackets ? "]]" : "")
                   }</span>`,
                 // ref renderer
-                (ref, def) => {
-                  const span = `<span id="${this.refIdGenerator(ref, def)}">${
+                (ref) => {
+                  const span = `<span id="${this.refIdGenerator(ref)}">${
                     (options?.ref?.showBrackets ? "[[" : "") +
                     ref.name + // don't use def.name here, because it may be an alias
                     (options?.ref?.showBrackets ? "]]" : "")
                   }</span>`;
                   return options?.ref?.html || options?.output?.html
-                    ? `<a href="${def.path}#${def.id}">${span}</a>`
-                    : `[${span}](${def.path}#${def.id})`;
+                    ? `<a href="${ref.def.path}#${ref.def.id}">${span}</a>`
+                    : `[${span}](${ref.def.path}#${ref.def.id})`;
                 }
               ),
               ...rest,

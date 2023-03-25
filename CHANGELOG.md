@@ -4,8 +4,8 @@
 
 - Add interface `Reference`.
 - **Breaking Change**: `Definition.refs` will be `Reference[]` instead of `string[]`.
-- **Breaking Change**: `RefIdGenerator` is `(ref: Reference, def: Definition) => string`.
-- **Breaking Change**: `RefRenderer` is `(ref: Reference, def: Definition) => string`.
+- **Breaking Change**: `RefIdGenerator` is `(ref: Reference) => string`.
+- **Breaking Change**: `RefRenderer` is `(ref: Reference) => string`.
 - **Breaking Change**: rename `BiParser.collectXXX` to `BiParser.parseXXX`.
 - Fix: escaped reference for alias will be rendered as the alias instead of the name.
 

@@ -25,7 +25,7 @@ export class BiDoc {
     this.defIdGenerator = options?.defIdGenerator ?? ((name) => uslug(name));
     this.refIdGenerator =
       options?.refIdGenerator ??
-      ((ref, def) => `${def.id}-ref-${ref.index + 1}`);
+      ((ref) => `${ref.def.id}-ref-${ref.index + 1}`);
 
     this.name2def = new Map();
     this.id2def = new Map();
@@ -108,7 +108,7 @@ export class BiDoc {
       };
       r.def.refs.push(ref);
       if (r.type == "explicit") {
-        r.fragment.content = renderer(ref, r.def);
+        r.fragment.content = renderer(ref);
       } else {
         // escaped, just show the name
         r.fragment.content = ref.name;
@@ -137,7 +137,7 @@ export class BiDoc {
         name: r.content,
       };
       def.refs.push(ref);
-      r.content = renderer(ref, def);
+      r.content = renderer(ref);
     });
 
     return res.fragments;
@@ -189,8 +189,8 @@ export class BiDoc {
     if (!def)
       throw new Error(`Definition not found: ${JSON.stringify(options)}`);
 
-    return def.refs.map(
-      (ref) => `${ref.path}#${this.refIdGenerator(ref, def)}`
-    );
+    return def.refs.map((ref) => `${ref.path}#${this.refIdGenerator(ref)}`);
+  }
+
   }
 }
