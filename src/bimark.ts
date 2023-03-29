@@ -4,6 +4,7 @@ import { BiDoc } from "./bidoc.js";
 import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
 import { unified } from "unified";
+import { Definition } from "./model.js";
 
 export type BiMarkRenderOptions = {
   def?: {
@@ -33,12 +34,23 @@ export class BiMark extends BiDoc {
   /**
    * Collect definitions from a markdown document.
    */
-  collect(path: string, content: string) {
+  collectDefs(path: string, content: string) {
     const ast = remark.parse(content);
+    const result = [] as Definition[];
     visit(ast, (node) => {
-      if (node.type == "text")
-        this.collectDefinitions(node.value, path, node.position!);
+      if (node.type == "text") {
+        const res = this.collectDefinitions(node.value, path, node.position!);
+        result.push(...res.defs);
+      }
     });
+    return result;
+  }
+
+  /*
+   * Collect definitions from a markdown document.
+   */
+  collect(path: string, content: string) {
+    this.collectDefs(path, content);
     return this;
   }
 

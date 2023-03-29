@@ -5,6 +5,7 @@
 - Feat: extract type `EscapedReference` from `Reference`.
   - Escaped reference will not check if the definition exists.
 - Feat: explicit reference support `[[@name]]`.
+- Feat: add `BiMark.collectDefs` to get the newly collected definitions.
 
 ## v0.2.0
 
