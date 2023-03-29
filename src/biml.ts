@@ -29,6 +29,14 @@ export type BiMLRenderOptions = {
   };
 };
 
+export type BiMLCollectOptions = {
+  /**
+   * Query selectors for HTML to select elements to collect definitions.
+   * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
+   */
+  selectors?: string[];
+};
+
 export class BiML extends BiDoc {
   constructor(
     options?: Partial<Pick<BiML, "refIdGenerator" | "defIdGenerator">>
@@ -37,20 +45,9 @@ export class BiML extends BiDoc {
   }
 
   /**
-   * Collect definitions from an html document.
-   * Return the definitions collected.
+   * Find all text nodes in an html document.
    */
-  collectDefs(
-    path: string,
-    content: string,
-    options?: {
-      /**
-       * Query selectors for HTML to select elements to collect definitions.
-       * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
-       */
-      selectors?: string[];
-    }
-  ) {
+  findTextNodes(content: string, options?: BiMLCollectOptions) {
     const selectors = options?.selectors ?? [
       "p",
       "span",
@@ -63,21 +60,29 @@ export class BiML extends BiDoc {
       "li",
     ];
 
-    const targets = new Set<Text>(); // avoid processing the same text node twice
-    const ast = rehype.parse(content);
+    /** text=>{parent,index}, avoid processing the same text node twice */
+    const nodes = new Map<Text, { parent: Element; index: number }>();
 
+    // collect all targets
+    const ast = rehype.parse(content);
     selectors.forEach((s) => {
       selectAll(s, ast).forEach((node) => {
-        node.children.forEach((c) => {
-          if (c.type == "text") {
-            targets.add(c);
-          }
+        node.children.forEach((c, i) => {
+          if (c.type == "text") nodes.set(c, { parent: node, index: i });
         });
       });
     });
 
+    return { nodes, ast };
+  }
+
+  /**
+   * Collect definitions from an html document.
+   * Return the definitions collected.
+   */
+  collectDefs(path: string, content: string, options?: BiMLCollectOptions) {
     const result = [] as Definition[];
-    targets.forEach((c) => {
+    this.findTextNodes(content, options).nodes.forEach((_, c) => {
       const res = this.collectDefinitions(c.value, path, c.position!);
       result.push(...res.defs);
     });
@@ -87,17 +92,7 @@ export class BiML extends BiDoc {
   /**
    * Collect definitions from an html document.
    */
-  collect(
-    path: string,
-    content: string,
-    options?: {
-      /**
-       * Query selectors for HTML to select elements to collect definitions.
-       * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
-       */
-      selectors?: string[];
-    }
-  ) {
+  collect(path: string, content: string, options?: BiMLCollectOptions) {
     this.collectDefs(path, content, options);
     return this;
   }
@@ -119,24 +114,8 @@ export class BiML extends BiDoc {
     ];
     const refSelectors = options?.ref?.selectors ?? defSelectors;
 
-    const ast = rehype.parse(md);
-    /** text=>{parent,index}, avoid processing the same text node twice */
-    const targets = new Map<Text, { parent: Element; index: number }>();
-
-    // collect all targets
-    defSelectors.forEach((s) => {
-      selectAll(s, ast).forEach((node) => {
-        node.children.forEach((c, i) => {
-          if (c.type == "text") targets.set(c, { parent: node, index: i });
-        });
-      });
-    });
-    refSelectors.forEach((s) => {
-      selectAll(s, ast).forEach((node) => {
-        node.children.forEach((c, i) => {
-          if (c.type == "text") targets.set(c, { parent: node, index: i });
-        });
-      });
+    const { nodes: targets, ast } = this.findTextNodes(md, {
+      selectors: [...new Set([...defSelectors, ...refSelectors])],
     });
 
     // render

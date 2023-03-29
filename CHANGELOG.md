@@ -5,7 +5,9 @@
 - Feat: extract type `EscapedReference` from `Reference`.
   - Escaped reference will not check if the definition exists.
 - Feat: explicit reference support `[[@name]]`.
+- Feat: add `BiMark/BiML.findTextNodes`.
 - Feat: add `BiMark/BiML.collectDefs` to get the newly collected definitions.
+- Feat: add `BiML.BiMLCollectOptions`.
 
 ## v0.2.0
 

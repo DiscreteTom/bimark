@@ -4,7 +4,8 @@ import { BiDoc } from "./bidoc.js";
 import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
 import { unified } from "unified";
-import { Definition } from "./model.js";
+import { Definition, EscapedReference, Reference } from "./model.js";
+import { Text } from "hast";
 
 export type BiMarkRenderOptions = {
   def?: {
@@ -32,17 +33,37 @@ export class BiMark extends BiDoc {
   }
 
   /**
+   * Find all text nodes in a markdown document.
+   */
+  findTextNodes(md: string) {
+    const ast = remark.parse(md);
+    const nodes = [] as {
+      node: Text;
+      parent: Parameters<Parameters<typeof visit>[1]>[0];
+      index: number;
+    }[];
+    visit(ast, (node) => {
+      if ("children" in node) {
+        node.children;
+        node.children.forEach((c, i) => {
+          if (c.type == "text") {
+            nodes.push({ node: c, parent: node, index: i });
+          }
+        });
+      }
+    });
+    return { nodes, ast };
+  }
+
+  /**
    * Collect definitions from a markdown document.
    * Return the definitions collected.
    */
   collectDefs(path: string, content: string) {
-    const ast = remark.parse(content);
     const result = [] as Definition[];
-    visit(ast, (node) => {
-      if (node.type == "text") {
-        const res = this.collectDefinitions(node.value, path, node.position!);
-        result.push(...res.defs);
-      }
+    this.findTextNodes(content).nodes.forEach(({ node }) => {
+      const res = this.collectDefinitions(node.value, path, node.position!);
+      result.push(...res.defs);
     });
     return result;
   }
