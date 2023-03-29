@@ -141,5 +141,7 @@ BiMark provides low-level classes `BiDoc`/`BiParser` for you:
 - What characters are allowed in the id of a definition?
   - Regex: `` [^$&+,/:;=?!@ "'<>#%{}|\\^~[\]`\n\r] ``.
   - No, spaces are not allowed.
+- What characters are allowed in the escaped reference?
+  - Regex: `.*?`
 
 ## [CHANGELOG](https://github.com/DiscreteTom/bimark/blob/main/CHANGELOG.md)

@@ -167,8 +167,8 @@ export class BiParser {
 
     const resultFragments = this.processFragments(
       fragments,
-      // [[#id]] or [[!name]]
-      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+))\]\]/g,
+      // [[#id]] or [[!any]]
+      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(!.*?))\]\]/g,
       (m, position, fi) => {
         const type = m[1].startsWith("#") ? "explicit" : "escaped";
         const def = type == "explicit" ? id2def.get(m[1].slice(1)) : undefined;
