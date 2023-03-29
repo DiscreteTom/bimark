@@ -33,6 +33,7 @@ export class BiMark extends BiDoc {
 
   /**
    * Collect definitions from a markdown document.
+   * Return the definitions collected.
    */
   collectDefs(path: string, content: string) {
     const ast = remark.parse(content);
