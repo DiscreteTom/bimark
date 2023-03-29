@@ -5,7 +5,7 @@ import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
 import { unified } from "unified";
 import { Definition, EscapedReference, Reference } from "./model.js";
-import { Text } from "hast";
+import { Parent, Text } from "mdast";
 
 export type BiMarkRenderOptions = {
   def?: {
@@ -39,7 +39,7 @@ export class BiMark extends BiDoc {
     const ast = remark.parse(md);
     const nodes = [] as {
       node: Text;
-      parent: Parameters<Parameters<typeof visit>[1]>[0];
+      parent: Parent;
       index: number;
     }[];
     visit(ast, (node) => {
