@@ -3,6 +3,7 @@
 ## Next
 
 - Feat: extract type `EscapedReference` from `Reference`.
+  - Escaped reference will not check if the definition exists.
 
 ## v0.2.0
 
