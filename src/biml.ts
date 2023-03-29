@@ -4,6 +4,7 @@ import rehypeStringify from "rehype-stringify";
 import { BiDoc } from "./bidoc.js";
 import { selectAll } from "hast-util-select";
 import { Element, Text } from "hast";
+import { Definition } from "./model.js";
 
 export type BiMLRenderOptions = {
   def?: {
@@ -37,8 +38,9 @@ export class BiML extends BiDoc {
 
   /**
    * Collect definitions from an html document.
+   * Return the definitions collected.
    */
-  collect(
+  collectDefs(
     path: string,
     content: string,
     options?: {
@@ -74,7 +76,29 @@ export class BiML extends BiDoc {
       });
     });
 
-    targets.forEach((c) => this.collectDefinitions(c.value, path, c.position!));
+    const result = [] as Definition[];
+    targets.forEach((c) => {
+      const res = this.collectDefinitions(c.value, path, c.position!);
+      result.push(...res.defs);
+    });
+    return result;
+  }
+
+  /**
+   * Collect definitions from an html document.
+   */
+  collect(
+    path: string,
+    content: string,
+    options?: {
+      /**
+       * Query selectors for HTML to select elements to collect definitions.
+       * Default: `["p", "span", "h1", "h2", "h3", "h4", "h5", "h6", "li"]`
+       */
+      selectors?: string[];
+    }
+  ) {
+    this.collectDefs(path, content, options);
     return this;
   }
 
