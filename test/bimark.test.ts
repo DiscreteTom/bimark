@@ -75,11 +75,14 @@ test("render", () => {
   expect(bm.render("", "[[#bimark]]").trim()).toBe(
     '[<span id="bimark-ref-2">BiMark</span>](#bimark)'
   );
+  expect(bm.render("", "[[@BiMark]]").trim()).toBe(
+    '[<span id="bimark-ref-3">BiMark</span>](#bimark)'
+  );
   // escaped ref
   expect(bm.render("", "[[!BiMark]]").trim()).toBe("BiMark");
   // alias ref
   expect(bm.render("", "bimark").trim()).toBe(
-    '[<span id="bimark-ref-3">bimark</span>](#bimark)'
+    '[<span id="bimark-ref-4">bimark</span>](#bimark)'
   );
   // escaped alias
   expect(bm.render("", "[[!bimark]]").trim()).toBe("bimark");

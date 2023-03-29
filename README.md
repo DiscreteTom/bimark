@@ -46,14 +46,14 @@ Once the [<span id="bidirectional-links-ref-1">bidirectional links</span>](#bidi
 
 ### Explicit Reference
 
-You can create references explicitly using `[[#id]]`:
+You can create references explicitly using `[[#id]]` or `[[@name]]`:
 
 ```md
 # [[BiMark]]
 
 [[#bimark]] is a tool to auto create [[bidirectional links]] between markdown files.
 
-Once the [[#bidirectional-links]] is created, you can use it to navigate between markdown files.
+Once the [[@bidirectional links]] is created, you can use it to navigate between markdown files.
 ```
 
 ### Advanced Definition

@@ -167,11 +167,16 @@ export class BiParser {
 
     const resultFragments = this.processFragments(
       fragments,
-      // [[#id]] or [[!any]]
-      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(!.*?))\]\]/g,
+      // [[#id]] or [[@name]] or [[!any]]
+      /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(@[^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+)|(!.*?))\]\]/g,
       (m, position, fi) => {
-        const type = m[1].startsWith("#") ? "explicit" : "escaped";
-        const def = type == "explicit" ? id2def.get(m[1].slice(1)) : undefined;
+        const type = ["#", "@"].includes(m[1][0]) ? "explicit" : "escaped";
+        const def =
+          type == "explicit"
+            ? m[1][0] == "#"
+              ? id2def.get(m[1].slice(1))
+              : name2def.get(m[1].slice(1))
+            : undefined;
         if (type == "explicit" && !def)
           throw new Error(`Definition not found: ${m[1]} from ${path}`);
 
@@ -187,7 +192,10 @@ export class BiParser {
             type,
             def: def!,
             path,
-            name: def!.name, // explicit, use the name of the definition
+            name:
+              m[1][0] == "#"
+                ? def!.name // explicit with ID, use the name of the definition
+                : m[1].slice(1), // explicit with name, use the name of the reference
           });
         }
 

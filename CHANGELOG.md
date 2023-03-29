@@ -4,6 +4,7 @@
 
 - Feat: extract type `EscapedReference` from `Reference`.
   - Escaped reference will not check if the definition exists.
+- Feat: explicit reference support `[[@name]]`.
 
 ## v0.2.0
 
