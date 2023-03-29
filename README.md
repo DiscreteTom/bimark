@@ -70,7 +70,7 @@ Once the [[#bidirectional-links]] is created, you can use it to navigate between
 
 ### Escaped Reference
 
-You can escape a reference using `[[!name]]`:
+You can escape a reference using `[[!any string]]`:
 
 ```md
 # [[BiMark]]
@@ -78,7 +78,7 @@ You can escape a reference using `[[!name]]`:
 [[!BiMark]] is a tool to auto create [[bidirectional link]] between markdown files.
 ```
 
-The escaped reference will not be replaced with a link, and will not be assigned an id.
+The escaped reference will not check if the definition exists, not be replaced with a link, and will not be assigned with an id.
 
 ### API
 
