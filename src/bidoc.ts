@@ -106,16 +106,13 @@ export class BiDoc {
     const refs = res.refs.map((r) => {
       const ref: Reference = {
         ...r,
-        index:
-          r.type == "escaped"
-            ? r.def.refs.at(-1)?.index ?? -1 // escaped reference always has the same index as the last reference since they won't be rendered
-            : (r.def.refs.at(-1)?.index ?? -1) + 1,
+        index: (r.def.refs.at(-1)?.index ?? -1) + 1,
       };
       r.def.refs.push(ref);
       return ref;
     });
 
-    return { fragments: res.fragments, refs };
+    return { fragments: res.fragments, refs, escaped: res.escaped };
   }
 
   /**
@@ -136,10 +133,9 @@ export class BiDoc {
     );
     res.defs.forEach((def) => (def.fragment.content = defRenderer(def)));
     const res2 = this.collectReferencesFromFragments(res.fragments, path);
-    res2.refs.forEach(
-      (ref) =>
-        (ref.fragment.content =
-          ref.type == "escaped" ? ref.name : refRenderer(ref))
+    res2.refs.forEach((ref) => (ref.fragment.content = refRenderer(ref)));
+    res2.escaped.forEach(
+      (ref) => (ref.fragment.content = ref.fragment.content.slice(3, -2)) // remove `[[#` and `]]`
     );
 
     return res2.fragments.map((f) => f.content).join("");

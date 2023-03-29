@@ -36,12 +36,19 @@ export interface Reference {
   /** The file path of the reference. */
   path: string;
   fragment: Fragment;
-  type: "escaped" | "implicit" | "explicit";
-  /** Only implicit/explicit reference has a unique index. */
+  /** unique index */
   index: number;
+  type: "implicit" | "explicit";
+  def: Definition;
   /** name or alias */
   name: string;
-  def: Definition;
+}
+
+export interface EscapedReference {
+  type: "escaped";
+  fragment: Fragment;
+  /** The file path of the reference. */
+  path: string;
 }
 
 export interface Definition {

@@ -1,6 +1,7 @@
 import {
   DefIdGenerator,
   Definition,
+  EscapedReference,
   Fragment,
   FragmentProcessor,
   Position,
@@ -160,6 +161,9 @@ export class BiParser {
       /** index of fragment */
       fi: number;
     })[] = [];
+    const escaped: (Omit<EscapedReference, "fragment"> & {
+      fi: number;
+    })[] = [];
 
     const resultFragments = this.processFragments(
       fragments,
@@ -167,22 +171,25 @@ export class BiParser {
       /\[\[((#[^$&+,/:;=?!@ "'<>#%{}|\\^~\[\]`\n\r]+)|(![^$&+,/:;=?!@"'<>#%{}|\\^~\[\]`\n\r]+))\]\]/g,
       (m, position, fi) => {
         const type = m[1].startsWith("#") ? "explicit" : "escaped";
-        const def =
-          type == "explicit"
-            ? id2def.get(m[1].slice(1))
-            : name2def.get(m[1].slice(1));
-        if (!def) throw new Error(`Definition not found: ${m[1]} from ${path}`);
+        const def = type == "explicit" ? id2def.get(m[1].slice(1)) : undefined;
+        if (type == "explicit" && !def)
+          throw new Error(`Definition not found: ${m[1]} from ${path}`);
 
-        refs.push({
-          fi,
-          type,
-          def,
-          path,
-          name:
-            type == "escaped"
-              ? m[1].slice(1) // remove the first char "!"
-              : def.name, // explicit, use the name of the definition
-        });
+        if (type == "escaped") {
+          escaped.push({
+            fi,
+            type,
+            path,
+          });
+        } else {
+          refs.push({
+            fi,
+            type,
+            def: def!,
+            path,
+            name: def!.name, // explicit, use the name of the definition
+          });
+        }
 
         return {
           content: m[0],
@@ -197,6 +204,10 @@ export class BiParser {
         ...r,
         fragment: resultFragments[r.fi],
       })) as Omit<Reference, "index">[],
+      escaped: escaped.map((e) => ({
+        ...e,
+        fragment: resultFragments[e.fi],
+      })) as EscapedReference[],
     };
   }
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: extract type `EscapedReference` from `Reference`.
+
 ## v0.2.0
 
 - Add interface `Reference`.
