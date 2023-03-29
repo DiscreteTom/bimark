@@ -83,6 +83,8 @@ test("render", () => {
   );
   // escaped alias
   expect(bm.render("", "[[!bimark]]").trim()).toBe("bimark");
+  // escaped any
+  expect(bm.render("", "[[!123456789]]").trim()).toBe("123456789");
 });
 
 test("complex render with options", () => {
