@@ -29,20 +29,24 @@ export class BiParser {
 
       const matches = [...f.content.matchAll(regex)];
       matches.forEach((m, i, all) => {
+        /** index of fragment content */
         const start = m.index!;
+        /** index of fragment content */
         const end = m.index! + m[0].length;
-        const before = f.content.slice(
+        /** index of fragment content */
+        const beforeStart =
           i == 0
             ? 0 // current match is the first one
-            : all[i - 1].index! + all[i - 1][0].length, // current match is not the first one
-          start
-        );
-        const after = f.content.slice(
-          end,
+            : all[i - 1].index! + all[i - 1][0].length; // current match is not the first one, `before` starts from the end of the previous match
+        /** fragment content before the current match, after the previous match */
+        const before = f.content.slice(beforeStart, start);
+        /** index of fragment content */
+        const afterEnd =
           i == all.length - 1
             ? undefined // current match is the last one
-            : all[i + 1].index! + all[i + 1][0].length // current match is not the last one
-        );
+            : all[i + 1].index!; // current match is not the last one, `after` ends at the start of the next match
+        /** fragment content after the current match, before the next match */
+        const after = f.content.slice(end, afterEnd);
 
         // append before to result
         if (before.length > 0) {
@@ -50,35 +54,33 @@ export class BiParser {
             content: before,
             skip: false,
             position: {
-              start: f.position.start,
+              start: shift(
+                f.position.start,
+                f.content.slice(
+                  1, // skip the first char since it is counted in the start position
+                  beforeStart + 1 // count the first char of before
+                )
+              ),
               end: shift(
                 f.position.start,
-                before.slice(1) // skip the first char since it is counted in the start position
+                f.content.slice(1, start) // skip the first char since it is counted in the start position
               ),
             },
           });
         }
         // append process result
         const position = {
-          start:
-            before.length == 0
-              ? f.position.start
-              : shift(
-                  f.position.start,
-                  before.slice(1) + // skip the first char of before
-                    m[0][0] // count the first char of current match
-                ),
-          end:
-            before.length == 0
-              ? shift(
-                  f.position.start,
-                  m[0].slice(1) // skip the first char of current match
-                )
-              : shift(
-                  f.position.start,
-                  before.slice(1) + // skip the first char of before
-                    m[0]
-                ),
+          start: shift(
+            f.position.start,
+            f.content.slice(
+              1, // skip the first char since it is counted in the start position
+              start + 1 // count the first char of current match
+            )
+          ),
+          end: shift(
+            f.position.start,
+            f.content.slice(1, end) // skip the first char of before
+          ),
         };
         result.push({
           ...processor(m, position, result.length),
@@ -91,10 +93,13 @@ export class BiParser {
             skip: false,
             position: {
               start: shift(
-                position.end, // use the end position of the current match
-                after[0] // count the first char of after
+                f.position.start,
+                f.content.slice(
+                  1, // skip the first char since it is counted in the start position
+                  end + 1 // count the first char of after
+                )
               ),
-              end: f.position.end,
+              end: shift(f.position.start, f.content.slice(1, afterEnd)), // skip the first char of after
             },
           });
         }

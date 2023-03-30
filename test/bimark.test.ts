@@ -61,6 +61,27 @@ test("multiline collect", () => {
   ).toBe(35);
 });
 
+test("collect multi definition/references in one line", () => {
+  const bm = new BiMark().collect("", `# [[aaa]] [[bbb]]`);
+  expect(bm.name2def.size).toBe(2);
+  expect(bm.name2def.get("aaa")!.fragment.position.start.column).toBe(3);
+  expect(bm.name2def.get("aaa")!.fragment.position.end.column).toBe(9);
+  expect(bm.name2def.get("bbb")!.fragment.position.start.column).toBe(11);
+  expect(bm.name2def.get("bbb")!.fragment.position.end.column).toBe(17);
+
+  bm.collectRefs("", `123 aaa bbb 456`);
+  expect(bm.name2def.get("aaa")!.refs.length).toBe(1);
+  expect(bm.name2def.get("aaa")!.refs[0].fragment.position.start.column).toBe(
+    5
+  );
+  expect(bm.name2def.get("aaa")!.refs[0].fragment.position.end.column).toBe(7);
+  expect(bm.name2def.get("bbb")!.refs.length).toBe(1);
+  expect(bm.name2def.get("bbb")!.refs[0].fragment.position.start.column).toBe(
+    9
+  );
+  expect(bm.name2def.get("bbb")!.refs[0].fragment.position.end.column).toBe(11);
+});
+
 test("render", () => {
   const bm = new BiMark().collect("", `[[BiMark|bimark]]`);
   // def

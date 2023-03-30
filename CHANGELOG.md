@@ -10,6 +10,7 @@
 - Feat: add `BiMark/BiML.collectDefs` to get the newly collected definitions.
 - Feat: add `BiMark/BiML.collectRefs` to get the newly collected references.
 - Feat: add `BiML.BiMLCollectOptions`.
+- Fix: definition/reference position.
 
 ## v0.2.0
 
