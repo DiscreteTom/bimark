@@ -15,7 +15,7 @@ export function shift(p: Readonly<Point>, offset: string) {
   return {
     line: p.line + lines.length - 1,
     column: lines.length == 1 ? p.column + offset.length : lines.at(-1)!.length,
-  };
+  } as Point;
 }
 
 export interface Position {
