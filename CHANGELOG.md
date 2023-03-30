@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## Next
+## v0.3.0
 
-- Feat: extract type `EscapedReference` from `Reference`.
+- **Breaking Change**: extract type `EscapedReference` from `Reference`.
   - Escaped reference will not check if the definition exists: `[[!any]]`
-- Feat: add `BiDoc.escaped` to get escaped references.
+- **Breaking Change**: add `BiDoc.escaped` to get escaped references.
+  - You could not use `name2def/id2def.refs` to get escaped references any more.
 - Feat: explicit reference support `[[@name]]`.
 - Feat: add `BiMark/BiML.findTextNodes`.
 - Feat: add `BiMark/BiML.collectDefs` to get the newly collected definitions.
