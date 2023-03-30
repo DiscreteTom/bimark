@@ -8,6 +8,7 @@ import {
   DefRenderer,
   RefRenderer,
   Reference,
+  EscapedReference,
 } from "./model.js";
 import { BiParser } from "./parser.js";
 
@@ -16,6 +17,7 @@ export class BiDoc {
   readonly name2def: Map<string, Definition>;
   /** id => Definition */
   readonly id2def: Map<string, Definition>;
+  escaped: EscapedReference[];
   readonly defIdGenerator: DefIdGenerator;
   readonly refIdGenerator: RefIdGenerator;
 
@@ -29,6 +31,7 @@ export class BiDoc {
 
     this.name2def = new Map();
     this.id2def = new Map();
+    this.escaped = [];
   }
 
   /**
@@ -112,6 +115,9 @@ export class BiDoc {
       return ref;
     });
 
+    // collect escaped references
+    this.escaped.push(...res.escaped);
+
     return { fragments: res.fragments, refs, escaped: res.escaped };
   }
 
@@ -181,6 +187,7 @@ export class BiDoc {
     this.name2def.forEach((def) => {
       def.refs = def.refs.filter((ref) => ref.path != path);
     });
+    this.escaped = this.escaped.filter((ref) => ref.path != path);
 
     return this;
   }

@@ -4,6 +4,7 @@
 
 - Feat: extract type `EscapedReference` from `Reference`.
   - Escaped reference will not check if the definition exists: `[[!any]]`
+- Feat: add `BiDoc.escaped` to get escaped references.
 - Feat: explicit reference support `[[@name]]`.
 - Feat: add `BiMark/BiML.findTextNodes`.
 - Feat: add `BiMark/BiML.collectDefs` to get the newly collected definitions.
