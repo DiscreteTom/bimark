@@ -4,7 +4,7 @@ import rehypeStringify from "rehype-stringify";
 import { BiDoc } from "./bidoc.js";
 import { selectAll } from "hast-util-select";
 import { Element, Text } from "hast";
-import { Definition } from "./model.js";
+import { Definition, EscapedReference, Reference } from "./model.js";
 
 export type BiMLRenderOptions = {
   def?: {
@@ -102,6 +102,28 @@ export class BiML extends BiDoc {
   collect(path: string, content: string, options?: BiMLCollectOptions) {
     this.collectDefs(path, content, options);
     return this;
+  }
+
+  /**
+   * Collect references from an html document.
+   */
+  collectRefs(path: string, md: string, options?: BiMLCollectOptions) {
+    const result = {
+      refs: [] as { ref: Reference; parent: Text; index: number }[],
+      escaped: [] as { ref: EscapedReference; parent: Text; index: number }[],
+    };
+    this.findTextNodes(md, options).nodes.forEach(({ node: c, index: i }) => {
+      const { type, value, ...rest } = c;
+      const res = this.collectReferences(path, value, rest.position!);
+      res.refs.forEach((r) => {
+        result.refs.push({ ref: r, parent: c, index: i });
+      });
+      res.escaped.forEach((r) => {
+        result.escaped.push({ ref: r, parent: c, index: i });
+      });
+    });
+
+    return result;
   }
 
   /**

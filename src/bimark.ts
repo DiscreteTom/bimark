@@ -77,6 +77,28 @@ export class BiMark extends BiDoc {
   }
 
   /**
+   * Collect references from a markdown document.
+   */
+  collectRefs(path: string, md: string) {
+    const result = {
+      refs: [] as { ref: Reference; parent: Text; index: number }[],
+      escaped: [] as { ref: EscapedReference; parent: Text; index: number }[],
+    };
+    this.findTextNodes(md).nodes.forEach(({ node: c, index: i }) => {
+      const { type, value, ...rest } = c;
+      const res = this.collectReferences(path, value, rest.position!);
+      res.refs.forEach((r) => {
+        result.refs.push({ ref: r, parent: c, index: i });
+      });
+      res.escaped.forEach((r) => {
+        result.escaped.push({ ref: r, parent: c, index: i });
+      });
+    });
+
+    return result;
+  }
+
+  /**
    * Render a markdown file based on the collected definitions.
    */
   render(path: string, md: string, options?: BiMarkRenderOptions) {
