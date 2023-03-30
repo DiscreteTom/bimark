@@ -73,7 +73,14 @@ export class BiML extends BiDoc {
       });
     });
 
-    return { nodes, ast };
+    return {
+      nodes: [...nodes.entries()].map((entry) => ({
+        node: entry[0],
+        parent: entry[1].parent,
+        index: entry[1].index,
+      })),
+      ast,
+    };
   }
 
   /**
@@ -82,7 +89,7 @@ export class BiML extends BiDoc {
    */
   collectDefs(path: string, content: string, options?: BiMLCollectOptions) {
     const result = [] as Definition[];
-    this.findTextNodes(content, options).nodes.forEach((_, c) => {
+    this.findTextNodes(content, options).nodes.forEach(({ node: c }) => {
       const res = this.collectDefinitions(c.value, path, c.position!);
       result.push(...res.defs);
     });
@@ -119,7 +126,7 @@ export class BiML extends BiDoc {
     });
 
     // render
-    targets.forEach(({ parent, index }, c) => {
+    targets.forEach(({ parent, index, node: c }) => {
       parent.children[index] = {
         type: "raw",
         value: this.renderText(
