@@ -11,6 +11,7 @@
 - Feat: add `BiMark/BiML.collectRefs` to get the newly collected references.
 - Feat: add `BiML.BiMLCollectOptions`.
 - Fix: definition/reference position.
+- Fix: `Point.column` must be greater than 0.
 
 ## v0.2.0
 

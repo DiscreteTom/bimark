@@ -10,12 +10,36 @@ export interface Point {
  * For example, if the point is at line 1, column 1, and the offset is "abc\ndef",
  * the new point will be at line 2, column 3.
  */
-export function shift(p: Readonly<Point>, offset: string) {
+export function shift(p: Readonly<Point>, offset: string): Point {
   const lines = offset.split("\n");
-  return {
-    line: p.line + lines.length - 1,
-    column: lines.length == 1 ? p.column + offset.length : lines.at(-1)!.length,
-  } as Point;
+  if (lines.length == 1) {
+    // same line
+    return {
+      line: p.line,
+      column: p.column + offset.length, // add the length
+    };
+  } else {
+    // lines.length >= 2
+    if (lines.at(-1)!.length == 0) {
+      if (lines.length == 2) {
+        // the last line is empty, and there is only 2 lines
+        return {
+          line: p.line, // still the same line
+          column: p.column + lines.at(-2)!.length + 1, // the last line is empty, so the column should add the length of the second last line + 1 (\n)
+        };
+      }
+      // lines.length > 2
+      return {
+        line: p.line + lines.length - 2, // the last line is empty, so the line is the second last line
+        column: lines.at(-2)!.length + 1, // the last line is empty, so the column is the length of the second last line + 1 (\n)
+      };
+    }
+    // the last line is not empty
+    return {
+      line: p.line + lines.length - 1, // the last line is not empty, so the line is the last line
+      column: lines.at(-1)!.length, // the last line is not empty, so the column is the length of the last line
+    };
+  }
 }
 
 export interface Position {
