@@ -4,7 +4,7 @@ import rehypeStringify from "rehype-stringify";
 import { BiDoc } from "./bidoc.js";
 import { selectAll } from "hast-util-select";
 import { Element, Text } from "hast";
-import { Definition, EscapedReference, Reference } from "./model.js";
+import { Definition, EscapedReference, Position, Reference } from "./model.js";
 
 export type BiMLRenderOptions = {
   def?: {
@@ -90,7 +90,11 @@ export class BiML extends BiDoc {
   collectDefs(path: string, content: string, options?: BiMLCollectOptions) {
     const result = [] as Definition[];
     this.findTextNodes(content, options).nodes.forEach(({ node: c }) => {
-      const res = this.collectDefinitions(c.value, path, c.position!);
+      const res = this.collectDefinitions(
+        c.value,
+        path,
+        c.position! as Position
+      );
       result.push(...res.defs);
     });
     return result;
@@ -114,7 +118,11 @@ export class BiML extends BiDoc {
     };
     this.findTextNodes(md, options).nodes.forEach(({ node: c, index: i }) => {
       const { type, value, ...rest } = c;
-      const res = this.collectReferences(path, value, rest.position!);
+      const res = this.collectReferences(
+        path,
+        value,
+        rest.position! as Position
+      );
       res.refs.forEach((r) => {
         result.refs.push({ ref: r, parent: c, index: i });
       });
@@ -154,7 +162,7 @@ export class BiML extends BiDoc {
         value: this.renderText(
           path,
           c.value,
-          c.position!,
+          c.position! as Position,
           // def renderer
           (d) =>
             `<span id="${d.id}">${

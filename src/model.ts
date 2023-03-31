@@ -1,8 +1,10 @@
 export interface Point {
-  /** from 1 */
+  /** From 1. */
   line: number;
-  /** from 1 */
+  /** From 1. */
   column: number;
+  /** Index of the file. From 0. */
+  offset: number;
 }
 
 /**
@@ -17,6 +19,7 @@ export function shift(p: Readonly<Point>, offset: string): Point {
     return {
       line: p.line,
       column: p.column + offset.length, // add the length
+      offset: p.offset + offset.length,
     };
   } else {
     // lines.length >= 2
@@ -26,18 +29,21 @@ export function shift(p: Readonly<Point>, offset: string): Point {
         return {
           line: p.line, // still the same line
           column: p.column + lines.at(-2)!.length + 1, // the last line is empty, so the column should add the length of the second last line + 1 (\n)
+          offset: p.offset + offset.length,
         };
       }
       // lines.length > 2
       return {
         line: p.line + lines.length - 2, // the last line is empty, so the line is the second last line
         column: lines.at(-2)!.length + 1, // the last line is empty, so the column is the length of the second last line + 1 (\n)
+        offset: p.offset + offset.length,
       };
     }
     // the last line is not empty
     return {
       line: p.line + lines.length - 1, // the last line is not empty, so the line is the last line
       column: lines.at(-1)!.length, // the last line is not empty, so the column is the length of the last line
+      offset: p.offset + offset.length,
     };
   }
 }

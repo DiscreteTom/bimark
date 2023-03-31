@@ -4,7 +4,7 @@ import { BiDoc } from "./bidoc.js";
 import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
 import { unified } from "unified";
-import { Definition, EscapedReference, Reference } from "./model.js";
+import { Definition, EscapedReference, Position, Reference } from "./model.js";
 import { Parent, Text } from "mdast";
 
 export type BiMarkRenderOptions = {
@@ -62,7 +62,11 @@ export class BiMark extends BiDoc {
   collectDefs(path: string, content: string) {
     const result = [] as Definition[];
     this.findTextNodes(content).nodes.forEach(({ node }) => {
-      const res = this.collectDefinitions(node.value, path, node.position!);
+      const res = this.collectDefinitions(
+        node.value,
+        path,
+        node.position! as Position
+      );
       result.push(...res.defs);
     });
     return result;
@@ -86,7 +90,11 @@ export class BiMark extends BiDoc {
     };
     this.findTextNodes(md).nodes.forEach(({ node: c, index: i }) => {
       const { type, value, ...rest } = c;
-      const res = this.collectReferences(path, value, rest.position!);
+      const res = this.collectReferences(
+        path,
+        value,
+        rest.position! as Position
+      );
       res.refs.forEach((r) => {
         result.refs.push({ ref: r, parent: c, index: i });
       });
@@ -111,7 +119,7 @@ export class BiMark extends BiDoc {
         value: this.renderText(
           path,
           c.value,
-          c.position!,
+          c.position! as Position,
           // def renderer
           (d) =>
             `<span id="${d.id}">${

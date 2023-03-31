@@ -10,8 +10,10 @@ test("simple collect", () => {
   expect(bm.name2def.get("BiMark")!.refs.length).toBe(0);
   expect(bm.name2def.get("BiMark")!.fragment.position.start.line).toBe(1);
   expect(bm.name2def.get("BiMark")!.fragment.position.start.column).toBe(3);
+  expect(bm.name2def.get("BiMark")!.fragment.position.start.offset).toBe(2);
   expect(bm.name2def.get("BiMark")!.fragment.position.end.line).toBe(1);
   expect(bm.name2def.get("BiMark")!.fragment.position.end.column).toBe(12);
+  expect(bm.name2def.get("BiMark")!.fragment.position.end.offset).toBe(11);
   expect(bm.name2def.get("BiMark")!).toBe(bm.id2def.get("bimark")!);
 });
 

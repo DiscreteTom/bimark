@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: add `Point.offset`.
+
 ## v0.3.0
 
 - **Breaking Change**: extract type `EscapedReference` from `Reference`.
