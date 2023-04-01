@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Fix: import path with file extension.
+
 ## v0.3.4
 
 - Fix: export `BiParserError/BiDocError`.

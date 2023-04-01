@@ -1,4 +1,4 @@
-import { Position } from "./model";
+import { Position } from "./model.js";
 
 export type BiParserErrorType = "DEF_NOT_FOUND";
 export class BiParserError extends Error {
