@@ -3,6 +3,7 @@
 ## Next
 
 - Feat: add `Point.offset`.
+- Feat: add `Reference.id`.
 
 ## v0.3.0
 

@@ -175,7 +175,7 @@ export class BiML extends BiDoc {
             }</span>`,
           // ref renderer
           (ref) => {
-            const span = `<span id="${this.refIdGenerator(ref)}">${
+            const span = `<span id="${ref.id}">${
               (options?.ref?.showBrackets ? "[[" : "") +
               ref.name + // don't use def.name here, because it may be an alias
               (options?.ref?.showBrackets ? "]]" : "")

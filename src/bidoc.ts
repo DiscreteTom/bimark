@@ -107,9 +107,13 @@ export class BiDoc {
 
     // assign index to references and store them in `this.name2def` and `this.id2def`
     const refs = res.refs.map((r) => {
-      const ref: Reference = {
+      const temp: Omit<Reference, "id"> = {
         ...r,
         index: (r.def.refs.at(-1)?.index ?? -1) + 1,
+      };
+      const ref: Reference = {
+        ...temp,
+        id: this.refIdGenerator(temp),
       };
       r.def.refs.push(ref);
       return ref;
@@ -160,7 +164,7 @@ export class BiDoc {
     if (!def)
       throw new Error(`Definition not found: ${JSON.stringify(options)}`);
 
-    return def.refs.map((ref) => `${ref.path}#${this.refIdGenerator(ref)}`);
+    return def.refs.map((ref) => `${ref.path}#${ref.id}`);
   }
 
   /**

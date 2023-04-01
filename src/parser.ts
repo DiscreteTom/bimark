@@ -162,7 +162,7 @@ export class BiParser {
     name2def: ReadonlyMap<string, Definition>,
     id2def: ReadonlyMap<string, Definition>
   ) {
-    const refs: (Omit<Reference, "fragment" | "index"> & {
+    const refs: (Omit<Reference, "fragment" | "index" | "id"> & {
       /** index of fragment */
       fi: number;
     })[] = [];
@@ -216,7 +216,7 @@ export class BiParser {
       refs: refs.map((r) => ({
         ...r,
         fragment: resultFragments[r.fi],
-      })) as Omit<Reference, "index">[],
+      })) as Omit<Reference, "index" | "id">[],
       escaped: escaped.map((e) => ({
         ...e,
         fragment: resultFragments[e.fi],
@@ -236,7 +236,7 @@ export class BiParser {
     def: Definition,
     path: string
   ) {
-    const refs: (Omit<Reference, "index" | "fragment"> & {
+    const refs: (Omit<Reference, "index" | "fragment" | "id"> & {
       /** index of fragment */
       fi: number;
     })[] = [];
@@ -258,7 +258,7 @@ export class BiParser {
       refs: refs.map((r) => ({
         ...r,
         fragment: resultFragments[r.fi],
-      })) as Omit<Reference, "index">[],
+      })) as Omit<Reference, "index" | "id">[],
     };
   }
 
@@ -274,7 +274,7 @@ export class BiParser {
   ) {
     const result = {
       fragments: fragments as Fragment[],
-      refs: [] as Omit<Reference, "index">[],
+      refs: [] as Omit<Reference, "index" | "id">[],
     };
     name2def.forEach((def, name) => {
       const res = this.parseImplicitReferences(

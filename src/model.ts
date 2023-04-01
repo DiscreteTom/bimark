@@ -72,6 +72,7 @@ export interface Reference {
   def: Definition;
   /** name or alias */
   name: string;
+  id: string;
 }
 
 export interface EscapedReference {
@@ -98,7 +99,7 @@ export type FragmentProcessor = (
 ) => Pick<Fragment, "content" | "skip">;
 
 export type DefIdGenerator = (name: string) => string;
-export type RefIdGenerator = (ref: Readonly<Reference>) => string;
+export type RefIdGenerator = (ref: Readonly<Omit<Reference, "id">>) => string;
 
 export type DefRenderer = (def: Readonly<Definition>) => string;
 export type RefRenderer = (ref: Readonly<Reference>) => string;
