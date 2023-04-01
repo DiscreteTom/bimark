@@ -50,8 +50,6 @@ export class BiDoc {
     );
 
     res.defs.forEach((d) => {
-      if (d.id.length == 0) d.id = this.defIdGenerator(d.name);
-
       // check name/alias/id duplication
       if (this.name2def.has(d.name))
         throw new Error(`Duplicate definition name: ${d.name} in file ${path}`);
@@ -84,7 +82,7 @@ export class BiDoc {
     const { fragments } = BiParser.parseDefinitions(
       BiParser.initFragments(text, position),
       path,
-      this.defIdGenerator
+      () => "" // dummy id generator (will not be used)
     );
 
     return this.collectReferencesFromFragments(fragments, path);

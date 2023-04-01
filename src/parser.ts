@@ -128,7 +128,7 @@ export class BiParser {
       (m, position, index) => {
         const name = m[1];
         const alias = m[2].split("|").slice(1);
-        const id = m[4] ? m[4].slice(1) : defIdGenerator(name);
+        const id = m[4]?.length > 1 ? m[4].slice(1) : defIdGenerator(name);
         const partial = {
           content: m[0],
           skip: true,
