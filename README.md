@@ -15,6 +15,7 @@ npm install bimark
 
 Other usages:
 
+- [Online playground](https://discretetom.github.io/bimark-playground/), see [bimark-playground](https://github.com/DiscreteTom/bimark-playground).
 - CLI, see [bimark-cli](https://github.com/DiscreteTom/bimark-cli).
 - VSCode extension, see [vscode-bimark](https://github.com/DiscreteTom/vscode-bimark).
 
