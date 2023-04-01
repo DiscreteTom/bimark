@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: add `BiDocError/BiParserError.position`.
+
 ## v0.3.2
 
 - Feat: optimize error class, add `BiParserError` and `BiDocError`.

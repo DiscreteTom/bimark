@@ -1,9 +1,12 @@
+import { Position } from "./model";
+
 export type BiParserErrorType = "DEF_NOT_FOUND";
 export class BiParserError extends Error {
   type: BiParserErrorType;
   defName?: string;
   defId?: string;
   defPath?: string;
+  position?: Position;
 
   constructor(type: BiParserErrorType, msg: string) {
     super(msg);
@@ -11,14 +14,20 @@ export class BiParserError extends Error {
     Object.setPrototypeOf(this, BiParserError.prototype);
   }
 
-  static defNotFound(path: string, content: string, type: "id" | "name") {
+  static defNotFound(
+    path: string,
+    content: string,
+    type: "id" | "name",
+    position: Position
+  ) {
     const err = new BiParserError(
       "DEF_NOT_FOUND",
-      `Definition not found: ${type}=${content} from ${path}`
+      `Definition not found at ${position.start.line}-${position.start.column}: ${type}=${content} from ${path}`
     );
     if (type == "id") err.defId = content;
     else err.defName = content;
     err.defPath = path;
+    err.position = position;
     return err;
   }
 }
@@ -30,6 +39,7 @@ export class BiDocError extends Error {
   defName?: string;
   defId?: string;
   defPath?: string;
+  position?: Position;
 
   constructor(type: BiDocErrorType, msg: string) {
     super(msg);
@@ -37,23 +47,25 @@ export class BiDocError extends Error {
     Object.setPrototypeOf(this, BiDocError.prototype);
   }
 
-  static duplicatedDefName(path: string, name: string) {
+  static duplicatedDefName(path: string, name: string, position: Position) {
     const err = new BiDocError(
       "DUP_DEF_NAME",
-      `Duplicate definition name: ${name} in file ${path}`
+      `Duplicate definition name at ${position.start.line}-${position.start.column}: ${name} in file ${path}`
     );
     err.defName = name;
     err.defPath = path;
+    err.position = position;
     return err;
   }
 
-  static duplicatedDefId(path: string, id: string) {
+  static duplicatedDefId(path: string, id: string, position: Position) {
     const err = new BiDocError(
       "DUP_DEF_ID",
-      `Duplicate definition id: ${id} in file ${path}`
+      `Duplicate definition id at ${position.start.line}-${position.start.column}: ${id} in file ${path}`
     );
     err.defId = id;
     err.defPath = path;
+    err.position = position;
     return err;
   }
 

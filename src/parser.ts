@@ -187,7 +187,8 @@ export class BiParser {
           throw BiParserError.defNotFound(
             path,
             m[1].slice(1),
-            m[1][0] == "#" ? "id" : "name"
+            m[1][0] == "#" ? "id" : "name",
+            position
           );
 
         if (type == "escaped") {

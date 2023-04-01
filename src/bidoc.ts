@@ -53,10 +53,12 @@ export class BiDoc {
     res.defs.forEach((d) => {
       // check name/alias/id duplication
       if (this.name2def.has(d.name))
-        throw BiDocError.duplicatedDefName(path, d.name);
-      if (this.id2def.has(d.id)) throw BiDocError.duplicatedDefId(path, d.id);
+        throw BiDocError.duplicatedDefName(path, d.name, d.fragment.position);
+      if (this.id2def.has(d.id))
+        throw BiDocError.duplicatedDefId(path, d.id, d.fragment.position);
       d.alias.forEach((a) => {
-        if (this.name2def.has(a)) throw BiDocError.duplicatedDefName(path, a);
+        if (this.name2def.has(a))
+          throw BiDocError.duplicatedDefName(path, a, d.fragment.position);
       });
 
       this.name2def.set(d.name, d);
