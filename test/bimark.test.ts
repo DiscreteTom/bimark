@@ -1,5 +1,4 @@
-import { BiMark } from "../src";
-import { BiDocError, BiParserError } from "../src/error";
+import { BiDocError, BiMark, BiParserError } from "../src";
 
 test("simple collect", () => {
   const bm = new BiMark().collect("", `# [[BiMark]]`);

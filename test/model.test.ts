@@ -1,4 +1,4 @@
-import { Point, shift } from "../src/model";
+import { shift } from "../src/model";
 
 test("point.column must be greater than 0", () => {
   // when new empty line, the result should stay at the same line
