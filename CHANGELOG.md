@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next
+## v0.3.1
 
 - Feat: add `Point.offset`.
 - Feat: add `Reference.id`.
