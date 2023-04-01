@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next
+## v0.3.3
 
 - Feat: add `BiDocError/BiParserError.position`.
 
