@@ -3,3 +3,4 @@ export * from "./parser.js";
 export * from "./bidoc.js";
 export * from "./model.js";
 export * from "./biml.js";
+export * from "./error.js";

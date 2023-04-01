@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.3.4
+
+- Fix: export `BiParserError/BiDocError`.
+
 ## v0.3.3
 
 - Feat: add `BiDocError/BiParserError.position`.
