@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: optimize error class, add `BiParserError` and `BiDocError`.
+
 ## v0.3.1
 
 - Feat: add `Point.offset`.

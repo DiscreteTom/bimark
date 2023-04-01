@@ -1,4 +1,5 @@
 import { BiMark } from "../src";
+import { BiDocError, BiParserError } from "../src/error";
 
 test("simple collect", () => {
   const bm = new BiMark().collect("", `# [[BiMark]]`);
@@ -225,4 +226,86 @@ test("i18n", () => {
   expect(bm.render("file.md", "中文").trim()).toBe(
     `[<span id="中文-ref-2">中文</span>](file.md#中文)`
   );
+});
+
+test("duplicate name/id", () => {
+  const bm = new BiMark().collect("", `# [[BiMark]]`);
+
+  // duplicate name
+  try {
+    bm.collect("", `# [[BiMark]]`);
+  } catch (e) {
+    expect(e instanceof BiDocError).toBe(true);
+    if (e instanceof BiDocError) {
+      expect(e.message).toMatch("Duplicate definition name");
+      expect(e.defName).toBe("BiMark");
+    }
+  }
+
+  // duplicate id
+  try {
+    bm.collect("", `# [[bimark]]`);
+  } catch (e) {
+    expect(e instanceof BiDocError).toBe(true);
+    if (e instanceof BiDocError) {
+      expect(e.message).toMatch("Duplicate definition id");
+      expect(e.defId).toBe("bimark");
+    }
+  }
+
+  // duplicate name/alias
+  try {
+    bm.collect("", `# [[Test|bimark]]`);
+  } catch (e) {
+    expect(e instanceof BiDocError).toBe(true);
+    if (e instanceof BiDocError) {
+      expect(e.message).toMatch("Duplicate definition name");
+      expect(e.defName).toBe("bimark");
+    }
+  }
+});
+
+test("undefined definition", () => {
+  const bm = new BiMark().collect("", `# [[BiMark]]`);
+
+  // def name not found
+  try {
+    bm.getReverseRefs({ name: "123" });
+  } catch (e) {
+    expect(e instanceof BiDocError).toBe(true);
+    if (e instanceof BiDocError) {
+      expect(e.message).toMatch("Definition not found");
+      expect(e.defName).toBe("123");
+    }
+  }
+  // def id not found
+  try {
+    bm.getReverseRefs({ id: "123" });
+  } catch (e) {
+    expect(e instanceof BiDocError).toBe(true);
+    if (e instanceof BiDocError) {
+      expect(e.message).toMatch("Definition not found");
+      expect(e.defId).toBe("123");
+    }
+  }
+  // ref.def.name not found
+  try {
+    bm.render("", "[[@123]]");
+  } catch (e) {
+    expect(e instanceof BiParserError).toBe(true);
+    if (e instanceof BiParserError) {
+      expect(e.message).toMatch("Definition not found");
+      expect(e.defName).toBe("123");
+    }
+  }
+  // ref.def.id not found
+  try {
+    bm.render("", "[[#123]]");
+  } catch (e) {
+    expect(e instanceof BiParserError).toBe(true);
+    if (e instanceof BiParserError) {
+      expect(e.message).toMatch("Definition not found");
+      expect(e.defId).toBe("123");
+    }
+  }
 });

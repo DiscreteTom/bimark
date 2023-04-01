@@ -1,3 +1,4 @@
+import { BiParserError } from "./error.js";
 import {
   DefIdGenerator,
   Definition,
@@ -183,7 +184,11 @@ export class BiParser {
               : name2def.get(m[1].slice(1))
             : undefined;
         if (type == "explicit" && !def)
-          throw new Error(`Definition not found: ${m[1]} from ${path}`);
+          throw BiParserError.defNotFound(
+            path,
+            m[1].slice(1),
+            m[1][0] == "#" ? "id" : "name"
+          );
 
         if (type == "escaped") {
           escaped.push({

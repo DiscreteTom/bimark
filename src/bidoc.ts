@@ -11,6 +11,7 @@ import {
   EscapedReference,
 } from "./model.js";
 import { BiParser } from "./parser.js";
+import { BiDocError } from "./error.js";
 
 export class BiDoc {
   /** name/alias => Definition */
@@ -52,12 +53,10 @@ export class BiDoc {
     res.defs.forEach((d) => {
       // check name/alias/id duplication
       if (this.name2def.has(d.name))
-        throw new Error(`Duplicate definition name: ${d.name} in file ${path}`);
-      if (this.id2def.has(d.id))
-        throw new Error(`Duplicate definition id: ${d.id} in file ${path}`);
+        throw BiDocError.duplicatedDefName(path, d.name);
+      if (this.id2def.has(d.id)) throw BiDocError.duplicatedDefId(path, d.id);
       d.alias.forEach((a) => {
-        if (this.name2def.has(a))
-          throw new Error(`Duplicate definition name: ${a} in file ${path}`);
+        if (this.name2def.has(a)) throw BiDocError.duplicatedDefName(path, a);
       });
 
       this.name2def.set(d.name, d);
@@ -159,8 +158,7 @@ export class BiDoc {
         ? this.id2def.get(options.id)
         : this.name2def.get(options.name);
 
-    if (!def)
-      throw new Error(`Definition not found: ${JSON.stringify(options)}`);
+    if (!def) throw BiDocError.defNotFound(options);
 
     return def.refs.map((ref) => `${ref.path}#${ref.id}`);
   }
