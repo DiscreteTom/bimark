@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next
+## v0.3.5
 
 - Fix: import path with file extension.
 
