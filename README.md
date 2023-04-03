@@ -33,7 +33,7 @@ BiMark is a tool to auto create [[bidirectional links]] between markdown files.
 Once bidirectional links are created, you can use it to navigate between markdown files.
 ```
 
-In the above example, `BiMark` and `bidirectional link` are definitions.
+In the above example, `BiMark` and `bidirectional links` are definitions.
 
 After rendering, all definitions and references will be modified to add an id, and all references will be automatically replaced with links:
 
