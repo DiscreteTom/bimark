@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next
+## v0.3.6
 
 - Feat: add static `BiMark.findTextNodes`.
 - Fix: Auto escape references in link. #2
