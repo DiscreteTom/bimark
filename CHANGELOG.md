@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: add static `BiMark.findTextNodes`.
+
 ## v0.3.5
 
 - Fix: import path with file extension.

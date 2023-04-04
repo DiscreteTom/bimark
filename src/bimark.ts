@@ -34,8 +34,19 @@ export class BiMark extends BiDoc {
 
   /**
    * Find all text nodes in a markdown document.
+   * Texts in links are ignored.
+   *
+   * @deprecated Use the static `findTextNodes` instead.
    */
   findTextNodes(md: string) {
+    return BiMark.findTextNodes(md);
+  }
+
+  /**
+   * Find all text nodes in a markdown document.
+   * Texts in links are ignored.
+   */
+  static findTextNodes(md: string) {
     const ast = remark.parse(md);
     const nodes = [] as {
       node: Text;
@@ -61,7 +72,7 @@ export class BiMark extends BiDoc {
    */
   collectDefs(path: string, content: string) {
     const result = [] as Definition[];
-    this.findTextNodes(content).nodes.forEach(({ node }) => {
+    BiMark.findTextNodes(content).nodes.forEach(({ node }) => {
       const res = this.collectDefinitions(
         node.value,
         path,
@@ -88,7 +99,7 @@ export class BiMark extends BiDoc {
       refs: [] as { ref: Reference; parent: Text; index: number }[],
       escaped: [] as { ref: EscapedReference; parent: Text; index: number }[],
     };
-    this.findTextNodes(md).nodes.forEach(({ node: c, index: i }) => {
+    BiMark.findTextNodes(md).nodes.forEach(({ node: c, index: i }) => {
       const { type, value, ...rest } = c;
       const res = this.collectReferences(
         path,
@@ -110,7 +121,7 @@ export class BiMark extends BiDoc {
    * Render a markdown file based on the collected definitions.
    */
   render(path: string, md: string, options?: BiMarkRenderOptions) {
-    const { nodes, ast } = this.findTextNodes(md);
+    const { nodes, ast } = BiMark.findTextNodes(md);
 
     nodes.forEach(({ node: c, index: i, parent }) => {
       const { type, value, ...rest } = c;
