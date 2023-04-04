@@ -48,7 +48,6 @@ export class BiMark extends BiDoc {
   static findTextNodes(md: string) {
     const ast = remark.parse(md);
     const nodes = BiMark.traverseNode(ast);
-    ast.children;
     return { nodes, ast };
   }
 
