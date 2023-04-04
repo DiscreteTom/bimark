@@ -3,6 +3,7 @@
 ## Next
 
 - Feat: add static `BiMark.findTextNodes`.
+- Fix: Auto escape references in link. #2
 
 ## v0.3.5
 

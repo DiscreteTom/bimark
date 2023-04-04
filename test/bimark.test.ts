@@ -111,6 +111,10 @@ test("render", () => {
   expect(bm.render("", "[[!bimark]]").trim()).toBe("bimark");
   // escaped any
   expect(bm.render("", "[[!123456789]]").trim()).toBe("123456789");
+  // auto escape implicit refs in link
+  expect(bm.render("", "[BiMark](https://bimark.com)").trim()).toBe(
+    "[BiMark](https://bimark.com)".trim()
+  );
 });
 
 test("complex render with options", () => {

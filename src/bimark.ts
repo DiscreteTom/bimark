@@ -1,5 +1,4 @@
 import { remark } from "remark";
-import { visit } from "unist-util-visit";
 import { BiDoc } from "./bidoc.js";
 import rehypeStringify from "rehype-stringify";
 import remark2rehype from "remark-rehype";
@@ -48,22 +47,33 @@ export class BiMark extends BiDoc {
    */
   static findTextNodes(md: string) {
     const ast = remark.parse(md);
-    const nodes = [] as {
+    const nodes = BiMark.traverseNode(ast);
+    ast.children;
+    return { nodes, ast };
+  }
+
+  /**
+   * Collect text nodes recursively, ignore links.
+   */
+  private static traverseNode(node: Parent) {
+    const result = [] as {
       node: Text;
       parent: Parent;
       index: number;
     }[];
-    visit(ast, (node) => {
-      if ("children" in node) {
-        node.children;
-        node.children.forEach((c, i) => {
-          if (c.type == "text") {
-            nodes.push({ node: c, parent: node, index: i });
-          }
-        });
+
+    // skip link
+    if (node.type == "link") return result;
+
+    node.children.forEach((c, i) => {
+      if ("children" in c) {
+        result.push(...BiMark.traverseNode(c));
+      } else if (c.type == "text") {
+        result.push({ node: c, parent: node, index: i });
       }
     });
-    return { nodes, ast };
+
+    return result;
   }
 
   /**
