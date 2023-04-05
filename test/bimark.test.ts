@@ -312,3 +312,28 @@ test("undefined definition", () => {
     }
   }
 });
+
+test("longest match", () => {
+  // simple case
+  const bm = new BiMark().collect("", `[[abc]] [[cd]]`);
+  bm.render("", `abcd`);
+  expect(bm.name2def.get("abc")!.refs.length).toBe(1);
+
+  // complex case, first defined definition is not the longest match
+  // this is to make sure the definition order does not matter
+  const bm2 = new BiMark().collect("", `# [[GAN]] [[LayoutGAN]]`);
+  expect(bm2.name2def.size).toBe(2);
+  bm2.collectRefs("", "LayoutGAN");
+  expect(bm2.name2def.get("GAN")!.refs.length).toBe(0);
+  expect(bm2.name2def.get("LayoutGAN")!.refs.length).toBe(1);
+  bm2.collectRefs("", "LayoutGAN");
+  expect(bm2.name2def.get("LayoutGAN")!.refs.length).toBe(2);
+  bm2.collectRefs("", "GAN");
+  expect(bm2.name2def.get("GAN")!.refs.length).toBe(1);
+  expect(bm2.render("", "LayoutGAN").trim()).toBe(
+    '[<span id="layoutgan-ref-3">LayoutGAN</span>](#layoutgan)'
+  );
+  expect(bm2.render("", "GAN").trim()).toBe(
+    '[<span id="gan-ref-2">GAN</span>](#gan)'
+  );
+});
