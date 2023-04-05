@@ -139,12 +139,6 @@ export class BiParser {
       }
     );
 
-    defs
-      .sort((a, b) => {
-        return Number(a.name < b.name);
-      })
-      .reverse();
-
     return {
       fragments: resultFragments,
       defs: defs.map(
