@@ -139,18 +139,22 @@ export class BiParser {
       }
     );
 
-    defs.sort((a, b) => { return Number(a.name < b.name) }).reverse()
+    defs
+      .sort((a, b) => {
+        return Number(a.name < b.name);
+      })
+      .reverse();
 
     return {
       fragments: resultFragments,
       defs: defs.map(
         (d) =>
-        ({
-          ...d,
-          path,
-          refs: [],
-          fragment: resultFragments[d.index],
-        } as Definition)
+          ({
+            ...d,
+            path,
+            refs: [],
+            fragment: resultFragments[d.index],
+          } as Definition)
       ),
     };
   }
