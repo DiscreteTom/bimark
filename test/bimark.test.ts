@@ -336,4 +336,10 @@ test("longest match", () => {
   expect(bm2.render("", "GAN").trim()).toBe(
     '[<span id="gan-ref-2">GAN</span>](#gan)'
   );
+
+  // test case in issue #3
+  const bm3 = new BiMark().collect("", `[[CP]] [[TCP]] TCP`);
+  bm3.render("", "[[CP]] [[TCP]] TCP");
+  expect(bm3.name2def.get("TCP")!.refs.length).toBe(1);
+  expect(bm3.name2def.get("CP")!.refs.length).toBe(0);
 });
