@@ -282,16 +282,20 @@ export class BiParser {
       fragments: fragments as Fragment[],
       refs: [] as Omit<Reference, "index" | "id">[],
     };
-    name2def.forEach((def, name) => {
-      const res = this.parseImplicitReferences(
-        result.fragments,
-        name,
-        def,
-        path
-      );
-      result.fragments = res.fragments;
-      result.refs.push(...res.refs);
-    });
+    [...name2def]
+      .sort((a, b) => {
+        return b[0].length - a[0].length; // sort by name's length (longer first)
+      })
+      .forEach(([name, def]) => {
+        const res = this.parseImplicitReferences(
+          result.fragments,
+          name,
+          def,
+          path
+        );
+        result.fragments = res.fragments;
+        result.refs.push(...res.refs);
+      });
     return result;
   }
 

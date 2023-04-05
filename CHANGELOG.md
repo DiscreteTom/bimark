@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Next
+
+- Feat: match longest definition name first. #3
+
 ## v0.3.6
 
 - Feat: add static `BiMark.findTextNodes`.
