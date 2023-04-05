@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next
+## v0.3.7
 
 - Feat: match longest definition name first. #3
 
